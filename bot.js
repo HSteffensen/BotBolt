@@ -16,4 +16,3 @@ client.on("message", (message) => {
     message.channel.send("pong!");
   }
 });
-//test1
