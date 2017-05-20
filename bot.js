@@ -16,12 +16,15 @@ client.on("message", (message) => {
     let messageSplit = message.content.split(" ");
     let command = messageSplit[0].slice(config.prefix.length);
     let args = messageSplit.slice(1);
-    console.log(command);
-    console.log(args);
 
-    let commandSanitize = /[^\w]/;
+    let commandSanitize = /[^\w]/; //test for anything other than [a-z], [A-Z], [0-9], or '_'. reject if found.
     if(!commandSanitize.test(command)) {
-      message.channel.send("out");
+      try {
+        let commandFile = require("./commands/${command}.js");
+        commandFile.run(client, message, args);
+      } catch (err) {
+        console.error(err);
+      }
     }
   }
 });
