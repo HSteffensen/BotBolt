@@ -20,7 +20,7 @@ client.on("message", (message) => {
     let commandSanitize = /[^\w]/; //test for anything other than [a-z], [A-Z], [0-9], or '_'. reject if found.
     if(!commandSanitize.test(command)) {
       try {
-        let commandFile = require("./commands/${command}.js");
+        let commandFile = require(`./commands/${command}.js`);
         commandFile.run(client, message, args);
       } catch (err) {
         console.error(err);
