@@ -10,9 +10,18 @@ client.on("ready", () => {
 
 client.on("message", (message) => {
   if (message.author.bot) return; //ignore other bots
-  if (!message.content.startsWith(config.prefix)) return; //ignore any non-commands
-  let command = message.content.slice(1);
-  if (command.startsWith("ping")) {
-    message.channel.send("pong!");
+  if (!message.content.startsWith(config.prefix)) {
+    return; //ignore any non-commands for now
+  } else {
+    let messageSplit = message.content.split(" ");
+    let command = messageSplit[0].slice(config.prefix.length);
+    let args = messageSplit.slice(1);
+    console.log(command);
+    console.log(args);
+
+    let commandSanitize = /[^\w]/;
+    if(!commandSanitize.test(command)) {
+      message.channel.send("out");
+    }
   }
 });
