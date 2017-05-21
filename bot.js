@@ -3,6 +3,7 @@ const client = new Discord.Client();
 const sql = require("sqlite");
 sql.open("./data/database.sqlite");
 const config = require("./config.json");
+const shortcut = require("./shortcut.json");
 
 client.login(config.token);
 
@@ -16,10 +17,12 @@ client.on("message", async (message) => {
   for(let i = 0; i < commands.length; i++) {
     let command = commands[i];
     if (command.type === "command") {
+      let commandName = (shortcut[command.name]) ? shortcut[command.name] : command.name;
+      console.log(command.name + " " + shortcut[command.name] + " " + commandName);
       let commandSanitize = /\b\w+\b/; //test for anything other than [a-z], [A-Z], [0-9], or '_'. reject if found.
-      if(commandSanitize.test(command.name)) {
+      if(commandSanitize.test(commandName)) {
         try {
-          let commandFile = require(`./commands/${command.name}.js`);
+          let commandFile = require(`./commands/${commandName}.js`);
           await commandFile.run(client, message, command, config, sql);
         } catch (err) {
           console.error(err);
@@ -30,7 +33,7 @@ client.on("message", async (message) => {
 });
 
 function parseForCommands(message) {
-  let commandRegexp = /([^\{\}\;]+\{[^\{\}]+\}|[^\{\}\;]+)/g; //splits commands by semicolon or allows semicolons inside {}
+  let commandRegexp = /([^\;]+\{[^\{\}]+\}[^\;]*|[^\;]+)/g; //splits commands by semicolon or allows semicolons inside a single pair of {}
   let messageSplit = message.match(commandRegexp);
   let commands = messageSplit.map((line) => {
     line = line.trim();

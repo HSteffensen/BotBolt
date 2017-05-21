@@ -1,0 +1,7 @@
+{
+  "$": "money",
+  "give": "givemoney",
+  "add": "addmoney",
+  "take": "takemoney",
+  "award": "addmoney"
+}
