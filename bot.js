@@ -19,8 +19,8 @@ client.on("message", (message) => {
     let command = messageSplit[0].slice(config.prefix.length);
     let args = messageSplit.slice(1);
 
-    let commandSanitize = /[^\w]/; //test for anything other than [a-z], [A-Z], [0-9], or '_'. reject if found.
-    if(!commandSanitize.test(command)) {
+    let commandSanitize = /\b\w+\b/; //test for anything other than [a-z], [A-Z], [0-9], or '_'. reject if found.
+    if(commandSanitize.test(command)) {
       try {
         let commandFile = require(`./commands/${command}.js`);
         commandFile.run(client, message, args, config, sql);
