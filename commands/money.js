@@ -1,4 +1,4 @@
-exports.run = async (client, message, args, config, sql) => {
+exports.run = async (client, message, command, config, sql) => {
   // Decide which user to check. Either caller or the mentioned name.
   let users = (message.mentions.users.array().length > 0) ? message.mentions.users.array() : [message.author];
 
@@ -23,7 +23,7 @@ exports.run = async (client, message, args, config, sql) => {
     description += `**${user.tag}** has \$${balance}.\n`;
   }
 
-
+  // Can't be silent or more verbose.
   message.channel.send("", {embed: {
     color: config.color,
     description: description

@@ -12,21 +12,15 @@ client.on("ready", () => {
 
 client.on("message", async (message) => {
   if (message.author.bot) return; //ignore other bots
-  let commands = parseMessageForCommands(message);
+  let commands = parseForCommands(message.content);
   for(let i = 0; i < commands.length; i++) {
-    let line = commands[i].trim();
-    if (!line.startsWith(config.prefix)) {
-      return; //ignore any non-commands for now
-    } else {
-      let messageSplit = line.split(" ");
-      let command = messageSplit[0].slice(config.prefix.length);
-      let args = messageSplit.slice(1);
-
+    let command = commands[i];
+    if (command.type === "command") {
       let commandSanitize = /\b\w+\b/; //test for anything other than [a-z], [A-Z], [0-9], or '_'. reject if found.
-      if(commandSanitize.test(command)) {
+      if(commandSanitize.test(command.name)) {
         try {
-          let commandFile = require(`./commands/${command}.js`);
-          await commandFile.run(client, message, args, config, sql);
+          let commandFile = require(`./commands/${command.name}.js`);
+          await commandFile.run(client, message, command, config, sql);
         } catch (err) {
           console.error(err);
         }
@@ -35,8 +29,34 @@ client.on("message", async (message) => {
   }
 });
 
-function parseMessageForCommands(message) {
+function parseForCommands(message) {
   let commandRegexp = /([^\{\}\;]+\{[^\{\}]+\}|[^\{\}\;]+)/g; //splits commands by semicolon or allows semicolons inside {}
-  let commandSplit = message.content.match(commandRegexp);
-  return commandSplit;
+  let messageSplit = message.match(commandRegexp);
+  let commands = messageSplit.map((line) => {
+    line = line.trim();
+    let command = {};
+    let lineSplit = line.split(" ");
+    if(line.startsWith(config.commandPrefix)) {
+      command.type = "command";
+      command.name = lineSplit[0].slice(config.commandPrefix.length);
+      command.silent = false;
+      command.verbose = false;
+      command.args = lineSplit.slice(1);
+      if(lineSplit[1] === "-s") {
+        command.silent = true;
+        command.args = lineSplit.slice(2);
+      } else if(lineSplit[1] === "-v") {
+        command.verbose = true;
+        command.args = lineSplit.slice(2);
+      }
+    } else if(line.startsWith(config.aliasPrefix)) {
+      command.type = "alias";
+      command.name = lineSplit[0].slice(config.commandPrefix.length);
+      command.args = lineSplit.slice(1);
+    }
+
+
+    return command;
+  });
+  return commands;
 }

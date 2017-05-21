@@ -1,8 +1,11 @@
-exports.run = (client, message, args, config) => {
+exports.run = (client, message, command, config) => {
+  let args = command.args;
   let gameStr = args.join(" ");
   client.user.setGame(gameStr);
-  message.channel.send("", {embed: {
-    color: config.color,
-    description: `${message.author} Game set.`
-  }});
+  if(!command.silent) {
+    message.channel.send("", {embed: {
+      color: config.color,
+      description: `${message.author} Game set.`
+    }});
+  }
 };

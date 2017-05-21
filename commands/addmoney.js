@@ -1,10 +1,13 @@
-exports.run = async (client, message, args, config, sql) => {
+exports.run = async (client, message, command, config, sql) => {
+  let args = command.args;
   // Caller must be bot owner
   let permitted = false;
   //let authorID = message.author.id.toString();
-  for(let i = 0, len = config.ownerIDs.length, owner = config.ownerIDs[i]; i < len; i++) {
+  for(let i = 0, len = config.ownerIDs.length; i < len; i++) {
+    let owner = config.ownerIDs[i];
     if(owner == message.author.id) {
       permitted = true;
+      break;
     }
   }
   if(!permitted) {
@@ -41,8 +44,10 @@ exports.run = async (client, message, args, config, sql) => {
     description +=`**${user.tag}** gained \$${amount}. \$${balance} => \$${balance + amount}\n`;
   }
 
-  message.channel.send("", {embed: {
-    color: config.color,
-    description: description
-  }});
+  if(!command.silent) {
+    message.channel.send("", {embed: {
+      color: config.color,
+      description: description
+    }});
+  }
 };

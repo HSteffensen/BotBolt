@@ -1,4 +1,5 @@
-exports.run = async (client, message, args, config, sql) => {
+exports.run = async (client, message, command, config, sql) => {
+  let args = command.args;
   let numberCheck = /\b\d+\b/;
   if(args.length != 2 || !numberCheck.test(args[0])) {
     return message.reply("syntax: `!givemoney # @`");
@@ -11,7 +12,6 @@ exports.run = async (client, message, args, config, sql) => {
   let userID = user.id;
   let userBalance = 0;
 
-  //get author's balance
   try {
     let row = await sql.get(`SELECT * FROM money WHERE userID ="${authorID}"`);
     if(!row) {
@@ -33,7 +33,6 @@ exports.run = async (client, message, args, config, sql) => {
   }
 */
 
-  //get recipient's balance
   try {
     let row = await sql.get(`SELECT * FROM money WHERE userID ="${userID}"`);
     if(!row) {
@@ -49,11 +48,15 @@ exports.run = async (client, message, args, config, sql) => {
     await sql.run("INSERT INTO money (userId, balance) VALUES (?, ?)", [userID, 0]);
   }
 
-  //update balances
-
-
-  message.channel.send("", {embed: {
-    color: config.color,
-    description: `**${message.author.tag}** has given \$${amount} to **${user.tag}**.`
-  }});
+  let description = `**${message.author.tag}** has given \$${amount} to **${user.tag}**.`;
+  if(command.verbose) {
+    description += `\n**${message.author.tag}** lost \$${amount}. \$${authorBalance} => \$${authorBalance - amount}`;
+    description += `\n**${user.tag}** gained \$${amount}. \$${userBalance} => \$${userBalance + amount}`;
+  }
+  if(!command.silent) {
+    message.channel.send("", {embed: {
+      color: config.color,
+      description: description
+    }});
+  }
 };

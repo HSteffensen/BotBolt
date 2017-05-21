@@ -1,4 +1,5 @@
-exports.run = async (client, message, args, config, sql) => {
+exports.run = async (client, message, command, config, sql) => {
+  let args = command.args;
   // Caller must be bot owner
   let permitted = false;
   //let authorID = message.author.id.toString();
@@ -46,8 +47,10 @@ exports.run = async (client, message, args, config, sql) => {
     }
   }
 
-  message.channel.send("", {embed: {
-    color: config.color,
-    description: description
-  }});
+  if(!command.silent) {
+    message.channel.send("", {embed: {
+      color: config.color,
+      description: description
+    }});
+  }
 };
