@@ -25,6 +25,6 @@ exports.run = async (client, message, args, config, sql) => {
 
   message.channel.send("", {embed: {
     color: config.color,
-    description: `${description}`
+    description: description
   }});
 };
