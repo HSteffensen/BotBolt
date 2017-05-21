@@ -17,7 +17,7 @@ exports.run = async (client, message, command, config, sql) => {
     if(!row) {
       await sql.run("INSERT INTO money (userID, balance) VALUES (?, ?)", [authorID, 0]);
     } else {
-      authorBalance = row.amount;
+      authorBalance = row.balance;
       amount = Math.min(amount, authorBalance);
       await sql.run(`UPDATE money SET balance = ${authorBalance - amount} WHERE userID = ${authorID}`);
     }
@@ -38,7 +38,7 @@ exports.run = async (client, message, command, config, sql) => {
     if(!row) {
       await sql.run("INSERT INTO money (userID, balance) VALUES (?, ?)", [userID, 0]);
     } else {
-      userBalance = row.amount;
+      userBalance = row.balance;
       await sql.run(`UPDATE money SET balance = ${userBalance + amount} WHERE userID = ${userID}`);
     }
   } catch(e) {
