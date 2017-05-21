@@ -27,19 +27,20 @@ exports.run = async (client, message, args, config, sql) => {
     try {
       let row = await sql.get(`SELECT * FROM money WHERE userID ="${userID}"`);
       if(!row) {
-        await sql.run("INSERT INTO money (userID, amount) VALUES (?, ?)", [userID, 0]);
+        await sql.run("INSERT INTO money (userID, balance) VALUES (?, ?)", [userID, 0]);
       } else {
-        balance = row.amount;
+        balance = row.balance;
         result = Math.max(balance - amount, 0);
-        await sql.run(`UPDATE money SET amount = ${result} WHERE userID = ${userID}`);
+        await sql.run(`UPDATE money SET balance = ${result} WHERE userID = ${userID}`);
       }
     } catch(e) {
       console.error(e);
-      await sql.run("CREATE TABLE IF NOT EXISTS money (userId TEXT, amount INTEGER)");
-      await sql.run("INSERT INTO money (userId, amount) VALUES (?, ?)", [userID, 0]);
+      console.log("Creating table money");
+      await sql.run("CREATE TABLE IF NOT EXISTS money (userId TEXT, balance INTEGER)");
+      await sql.run("INSERT INTO money (userId, balance) VALUES (?, ?)", [userID, 0]);
     }
     if(balance == 0) {
-      description +=`**${user.tag}** lost 0.\n`;
+      description +=`**${user.tag}** lost \$0.\n`;
     } else {
       description +=`**${user.tag}** lost \$${Math.min(amount, balance)}. \$${balance} => \$${result}\n`;
     }

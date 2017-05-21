@@ -15,16 +15,17 @@ exports.run = async (client, message, args, config, sql) => {
   try {
     let row = await sql.get(`SELECT * FROM money WHERE userID ="${authorID}"`);
     if(!row) {
-      await sql.run("INSERT INTO money (userID, amount) VALUES (?, ?)", [authorID, 0]);
+      await sql.run("INSERT INTO money (userID, balance) VALUES (?, ?)", [authorID, 0]);
     } else {
       authorBalance = row.amount;
       amount = Math.min(amount, authorBalance);
-      await sql.run(`UPDATE money SET amount = ${authorBalance - amount} WHERE userID = ${authorID}`);
+      await sql.run(`UPDATE money SET balance = ${authorBalance - amount} WHERE userID = ${authorID}`);
     }
   } catch(e) {
     console.error(e);
-    await sql.run("CREATE TABLE IF NOT EXISTS money (userId TEXT, amount INTEGER)");
-    await sql.run("INSERT INTO money (userId, amount) VALUES (?, ?)", [authorID, 0]);
+    console.log("Creating table money");
+    await sql.run("CREATE TABLE IF NOT EXISTS money (userId TEXT, balance INTEGER)");
+    await sql.run("INSERT INTO money (userId, balance) VALUES (?, ?)", [authorID, 0]);
   }
   /*
   if(authorBalance == 0) {
@@ -36,15 +37,16 @@ exports.run = async (client, message, args, config, sql) => {
   try {
     let row = await sql.get(`SELECT * FROM money WHERE userID ="${userID}"`);
     if(!row) {
-      await sql.run("INSERT INTO money (userID, amount) VALUES (?, ?)", [userID, 0]);
+      await sql.run("INSERT INTO money (userID, balance) VALUES (?, ?)", [userID, 0]);
     } else {
       userBalance = row.amount;
-      await sql.run(`UPDATE money SET amount = ${userBalance + amount} WHERE userID = ${userID}`);
+      await sql.run(`UPDATE money SET balance = ${userBalance + amount} WHERE userID = ${userID}`);
     }
   } catch(e) {
     console.error(e);
-    await sql.run("CREATE TABLE IF NOT EXISTS money (userId TEXT, amount INTEGER)");
-    await sql.run("INSERT INTO money (userId, amount) VALUES (?, ?)", [userID, 0]);
+    console.log("Creating table money");
+    await sql.run("CREATE TABLE IF NOT EXISTS money (userId TEXT, balance INTEGER)");
+    await sql.run("INSERT INTO money (userId, balance) VALUES (?, ?)", [userID, 0]);
   }
 
   //update balances

@@ -27,15 +27,16 @@ exports.run = async (client, message, args, config, sql) => {
     try {
       let row = await sql.get(`SELECT * FROM money WHERE userID ="${userID}"`);
       if(!row) {
-        await sql.run("INSERT INTO money (userID, amount) VALUES (?, ?)", [userID, amount]);
+        await sql.run("INSERT INTO money (userID, balance) VALUES (?, ?)", [userID, amount]);
       } else {
-        balance = row.amount;
-        await sql.run(`UPDATE money SET amount = ${balance + amount} WHERE userID = ${userID}`);
+        balance = row.balance;
+        await sql.run(`UPDATE money SET balance = ${balance + amount} WHERE userID = ${userID}`);
       }
     } catch(e) {
       console.error(e);
-      await sql.run("CREATE TABLE IF NOT EXISTS money (userId TEXT, amount INTEGER)");
-      await sql.run("INSERT INTO money (userId, amount) VALUES (?, ?)", [userID, amount]);
+      console.log("Creating table money");
+      await sql.run("CREATE TABLE IF NOT EXISTS money (userId TEXT, balance INTEGER)");
+      await sql.run("INSERT INTO money (userId, balance) VALUES (?, ?)", [userID, amount]);
     }
     description +=`**${user.tag}** gained \$${amount}. \$${balance} => \$${balance + amount}\n`;
   }
