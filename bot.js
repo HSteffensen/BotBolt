@@ -1,7 +1,7 @@
 const Discord = require("discord.js");
 const client = new Discord.Client();
 const sql = require("sqlite");
-sql.open("./data/database.sqlite")
+sql.open("./data/database.sqlite");
 const config = require("./config.json");
 
 client.login(config.token);
@@ -23,7 +23,7 @@ client.on("message", (message) => {
     if(!commandSanitize.test(command)) {
       try {
         let commandFile = require(`./commands/${command}.js`);
-        commandFile.run(client, message, args, config.color, sql);
+        commandFile.run(client, message, args, config, sql);
       } catch (err) {
         console.error(err);
       }
