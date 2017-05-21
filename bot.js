@@ -10,7 +10,7 @@ client.on("ready", () => {
   console.log("I am ready!");
 });
 
-client.on("message", (message) => {
+client.on("message", async (message) => {
   if (message.author.bot) return; //ignore other bots
   let commands = parseMessageForCommands(message);
   for(let i = 0; i < commands.length; i++) {
@@ -26,7 +26,7 @@ client.on("message", (message) => {
       if(commandSanitize.test(command)) {
         try {
           let commandFile = require(`./commands/${command}.js`);
-          commandFile.run(client, message, args, config, sql);
+          await commandFile.run(client, message, args, config, sql);
         } catch (err) {
           console.error(err);
         }
