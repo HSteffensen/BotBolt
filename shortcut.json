@@ -3,5 +3,6 @@
   "give": "givemoney",
   "add": "addmoney",
   "take": "takemoney",
-  "award": "addmoney"
+  "award": "addmoney",
+  "playing": "setgame"
 }
