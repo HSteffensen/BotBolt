@@ -27,7 +27,8 @@ client.on("message", async (message) => {
           }});
         }
         let aliasCommands = parseForCommands(unpackedLine);
-        for(let j = 0; i < aliasCommands.length; i++) {
+        console.log(aliasCommands);
+        for(let j = 0; j < aliasCommands.length; j++) {
           if(aliasCommands[j].type === "command") {
             await runCommand(aliasCommands[j], message);
           }

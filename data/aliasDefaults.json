@@ -1,0 +1,8 @@
+{
+  "list": [
+    {
+      "name": "example",
+      "commands": "!echo This is an example alias.;!wait 1;!echo Example finished."
+    }
+  ]
+}
