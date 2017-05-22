@@ -19,16 +19,18 @@ client.on("message", async (message) => {
       await runCommand(commands[i], message);
     } else if (commands[i].type === "alias") {
       let unpackedLine = await unpackAlias(commands[i].name);
-      if(!commands[i].silent) {
-        message.channel.send("", {embed: {
-          color: config.color,
-          description: `\"${commands[i].name}\" => \"${unpackedLine}\"`
-        }});
-      }
-      let aliasCommands = parseForCommands(unpackedLine);
-      for(let j = 0; i < aliasCommands.length; i++) {
-        if(aliasCommands[j].type === "command") {
-          await runCommand(aliasCommands[j], message);
+      if(unpackedLine.length > 0) {
+        if(!commands[i].silent) {
+          message.channel.send("", {embed: {
+            color: config.color,
+            description: `\"${commands[i].name}\" => \"${unpackedLine}\"`
+          }});
+        }
+        let aliasCommands = parseForCommands(unpackedLine);
+        for(let j = 0; i < aliasCommands.length; i++) {
+          if(aliasCommands[j].type === "command") {
+            await runCommand(aliasCommands[j], message);
+          }
         }
       }
     }
@@ -84,6 +86,8 @@ async function unpackAlias(aliasName) {
     let row = await sql.get(`SELECT * FROM alias WHERE name ="${aliasName}"`);
     if(row) {
       return row.commands;
+    } else {
+      return "";
     }
   } catch(e) {
     console.error(e);

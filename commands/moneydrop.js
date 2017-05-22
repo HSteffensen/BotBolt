@@ -30,6 +30,10 @@ exports.run = async (client, message, command, config, sql) => {
     return await setProperty(client, message, command, config, sql, channels);
   }
 
+  if(args[0] === "clear") {
+    return await clearMoneydrop(client, message, command, config, sql, channels);
+  }
+
   return await checkMoneydrop(client, message, command, config, sql, channels);
 };
 
@@ -147,4 +151,29 @@ async function setProperty(client, message, command, config, sql, channels) {
     description: description
   }});
 
+}
+
+async function clearMoneydrop(client, message, command, config, sql, channels) {
+  let description = "";
+  for(let i = 0, len = channels.length; i < len; i++) {
+    let channel = channels[i];
+    let channelID = channel.id;
+    try {
+      let row = await sql.get(`SELECT * FROM moneydrop WHERE channelID ="${channelID}"`);
+      if(row) {
+        await sql.run(`DELETE FROM moneydrop WHERE channelID = ${channelID}`);
+      }
+    } catch(e) {
+      console.error(e);
+      console.log("Creating table moneydrop");
+      await sql.run("CREATE TABLE IF NOT EXISTS moneydrop (channelID TEXT, dropMoney INTEGER, firstMin INTEGER, firstMax INTEGER, firstProbability FLOAT, secondMin INTEGER, secondMax INTEGER, secondProbability FLOAT, thirdMin INTEGER, thirdMax INTEGER, thirdProbability FLOAT)");
+    }
+    description += `Money drop information cleared and drop **disabled** in ${channel}.\n`;
+  }
+
+  // Can't be silent or more verbose.
+  message.channel.send("", {embed: {
+    color: config.color,
+    description: description
+  }});
 }
