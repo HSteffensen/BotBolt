@@ -24,8 +24,8 @@ exports.run = async (client, message, command, config, sql) => {
   } catch(e) {
     console.error(e);
     console.log("Creating table money");
-    await sql.run("CREATE TABLE IF NOT EXISTS money (userId TEXT, balance INTEGER)");
-    await sql.run("INSERT INTO money (userId, balance) VALUES (?, ?)", [authorID, 0]);
+    await sql.run("CREATE TABLE IF NOT EXISTS money (userID TEXT, balance INTEGER)");
+    await sql.run("INSERT INTO money (userID, balance) VALUES (?, ?)", [authorID, 0]);
   }
   /*
   if(authorBalance == 0) {
@@ -44,8 +44,8 @@ exports.run = async (client, message, command, config, sql) => {
   } catch(e) {
     console.error(e);
     console.log("Creating table money");
-    await sql.run("CREATE TABLE IF NOT EXISTS money (userId TEXT, balance INTEGER)");
-    await sql.run("INSERT INTO money (userId, balance) VALUES (?, ?)", [userID, 0]);
+    await sql.run("CREATE TABLE IF NOT EXISTS money (userID TEXT, balance INTEGER)");
+    await sql.run("INSERT INTO money (userID, balance) VALUES (?, ?)", [userID, 0]);
   }
 
   let description = `**${message.author.tag}** has given \$${amount} to **${user.tag}**.`;

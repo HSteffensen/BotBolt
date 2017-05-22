@@ -38,8 +38,8 @@ exports.run = async (client, message, command, config, sql) => {
     } catch(e) {
       console.error(e);
       console.log("Creating table money");
-      await sql.run("CREATE TABLE IF NOT EXISTS money (userId TEXT, balance INTEGER)");
-      await sql.run("INSERT INTO money (userId, balance) VALUES (?, ?)", [userID, amount]);
+      await sql.run("CREATE TABLE IF NOT EXISTS money (userID TEXT, balance INTEGER)");
+      await sql.run("INSERT INTO money (userID, balance) VALUES (?, ?)", [userID, amount]);
     }
     description +=`**${user.tag}** gained \$${amount}. \$${balance} => \$${balance + amount}\n`;
   }
