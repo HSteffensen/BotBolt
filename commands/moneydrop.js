@@ -117,7 +117,7 @@ async function toggleMoneydrop(client, message, command, config, sql, channels, 
 async function setProperty(client, message, command, config, sql, channels) {
   let args = command.args;
 
-  if(args[1] === "firstMin" || args[1] === "firstMax"|| args[1] === "secondMin"|| args[1] === "secondMax"|| args[1] === "thirdMin"|| args[1] === "thirdMax" || args[1] === "verbose") {
+  if(args[1] === "firstMin" || args[1] === "firstMax"|| args[1] === "secondMin"|| args[1] === "secondMax"|| args[1] === "thirdMin"|| args[1] === "thirdMax" || args[1] === "verbose" || args[1] === "pileSize") {
     let numberCheck = /\b\d+\b/;
     if(!numberCheck.test(args[2])) {
       return message.reply(`set ${args[1]} requires an integer.`);
@@ -178,7 +178,7 @@ async function clearMoneydrop(client, message, command, config, sql, channels) {
       console.log("Creating table moneydrop");
       await sql.run("CREATE TABLE IF NOT EXISTS moneydrop (channelID TEXT, dropMoney INTEGER, pileSize INTEGER, verbose INTEGER, firstMin INTEGER, firstMax INTEGER, firstProbability FLOAT, secondMin INTEGER, secondMax INTEGER, secondProbability FLOAT, thirdMin INTEGER, thirdMax INTEGER, thirdProbability FLOAT)");
     }
-    description += `Money drop information cleared and drop **disabled** in ${channel}.\n`;
+    description += `Moneydrop configuration **cleared**, money pile **deleted**, and drop **disabled** in ${channel}.\n`;
   }
 
   // Can't be silent or more verbose.

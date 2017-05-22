@@ -21,7 +21,7 @@ client.on("message", async (message) => {
   let aliasCommands = [];
   for(let i = 0; i < commands.length; i++) {
     if (commands[i].type === "command") {
-      if(commands[i].name === "moneydrop") {
+      if(commands[i].name === "moneydrop" || commands[i].name === "moneygrab") {
         moneypileCache.refresh = true;
       }
       await runCommand(commands[i], message);
@@ -37,7 +37,7 @@ client.on("message", async (message) => {
         aliasCommands = parseForCommands(unpackedLine);
         for(let j = 0; j < aliasCommands.length; j++) {
           if(aliasCommands[j].type === "command") {
-            if(aliasCommands[i].name === "moneydrop") {
+            if(aliasCommands[j].name === "moneydrop" || commands[i].name === "moneygrab") {
               moneypileCache.refresh = true;
             }
             await runCommand(aliasCommands[j], message);
