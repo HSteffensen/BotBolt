@@ -14,6 +14,15 @@ exports.run = (client, message, command, config, sql, shortcut) => {
     return message.reply("Permission denied: reload");
   }
 
+  if(args[0] === "routine") {
+    try {
+      delete require.cache[require.resolve(`../routines/${args[1]}.js`)];
+    } catch(e) {
+      return message.reply(`Bad request: routine \"${args[1]}\" not found.`);
+    }
+    return message.channel.send(`The routine \"${args[1]}\" has been reloaded.`);
+  }
+
   let commandName = (shortcut[args[0]]) ? shortcut[args[0]] : args[0];
   if(!args || args.length < 1) {
     return message.reply("Bad request: must provide a command name to reload.");
@@ -22,7 +31,7 @@ exports.run = (client, message, command, config, sql, shortcut) => {
   try {
     delete require.cache[require.resolve(`./${commandName}.js`)];
   } catch(e) {
-    return message.reply("Bad request: command \"" + args.join(" ") + "\" not found.");
+    return message.reply(`Bad request: routine \"${commandName}\" not found.`);
   }
   message.channel.send(`The command \"${commandName}\" has been reloaded.`);
 };

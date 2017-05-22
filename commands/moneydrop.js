@@ -45,11 +45,16 @@ async function checkMoneydrop(client, message, command, config, sql, channels) {
     try {
       let row = await sql.get(`SELECT * FROM moneydrop WHERE channelID ="${channelID}"`);
       if(!row) {
-        await sql.run("INSERT INTO moneydrop (channelID, dropMoney, firstMin, firstMax, firstProbability, secondMin, secondMax, secondProbability, thirdMin, thirdMax, thirdProbability) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-         [channelID, 0, 0, 20, 0.02, 20, 50, 0.005, 100, 300, 0.001]); //default amounts and probabilities
+        await sql.run("INSERT INTO moneydrop (channelID, dropMoney, pileSize, verbose, firstMin, firstMax, firstProbability, secondMin, secondMax, secondProbability, thirdMin, thirdMax, thirdProbability) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+         [channelID, 0, 0, 0, 0, 20, 0.02, 20, 50, 0.005, 100, 300, 0.001]); //default amounts and probabilities
+        description += `${channel}\n`;
+        description += `Enabled: ${false}. Verbose: ${false}\n`;
+        description += `Drop: ${0} to ${20}, ${0.02} chance.\n`;
+        description += `Drop: ${20} to ${50}, ${0.005} chance.\n`;
+        description += `Drop: ${100} to ${300}, ${0.001} chance.\n`;
       } else {
         description += `${channel}\n`;
-        description += `Enabled: ${(row.dropMoney == 1)}\n`;
+        description += `Enabled: ${(row.dropMoney == 1)}. Verbose: ${(row.verbose == 1)}\n`;
         description += `Drop: ${row.firstMin} to ${row.firstMax}, ${row.firstProbability} chance.\n`;
         description += `Drop: ${row.secondMin} to ${row.secondMax}, ${row.secondProbability} chance.\n`;
         description += `Drop: ${row.thirdMin} to ${row.thirdMax}, ${row.thirdProbability} chance.\n`;
@@ -57,9 +62,14 @@ async function checkMoneydrop(client, message, command, config, sql, channels) {
     } catch(e) {
       console.error(e);
       console.log("Creating table moneydrop");
-      await sql.run("CREATE TABLE IF NOT EXISTS moneydrop (channelID TEXT, dropMoney INTEGER, firstMin INTEGER, firstMax INTEGER, firstProbability FLOAT, secondMin INTEGER, secondMax INTEGER, secondProbability FLOAT, thirdMin INTEGER, thirdMax INTEGER, thirdProbability FLOAT)");
-      await sql.run("INSERT INTO moneydrop (channelID, dropMoney, firstMin, firstMax, firstProbability, secondMin, secondMax, secondProbability, thirdMin, thirdMax, thirdProbability) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-       [channelID, 0, 0, 20, 0.02, 20, 50, 0.005, 100, 300, 0.001]); //default amounts and probabilities
+      await sql.run("CREATE TABLE IF NOT EXISTS moneydrop (channelID TEXT, dropMoney INTEGER, pileSize INTEGER, verbose INTEGER, firstMin INTEGER, firstMax INTEGER, firstProbability FLOAT, secondMin INTEGER, secondMax INTEGER, secondProbability FLOAT, thirdMin INTEGER, thirdMax INTEGER, thirdProbability FLOAT)");
+      await sql.run("INSERT INTO moneydrop (channelID, dropMoney, pileSize, verbose, firstMin, firstMax, firstProbability, secondMin, secondMax, secondProbability, thirdMin, thirdMax, thirdProbability) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+       [channelID, 0, 0, 0, 0, 20, 0.02, 20, 50, 0.005, 100, 300, 0.001]); //default amounts and probabilities
+      description += `${channel}\n`;
+      description += `Enabled: ${false}. Verbose: ${false}\n`;
+      description += `Drop: ${0} to ${20}, ${0.02} chance.\n`;
+      description += `Drop: ${20} to ${50}, ${0.005} chance.\n`;
+      description += `Drop: ${100} to ${300}, ${0.001} chance.\n`;
     }
   }
 
@@ -78,17 +88,17 @@ async function toggleMoneydrop(client, message, command, config, sql, channels, 
     try {
       let row = await sql.get(`SELECT * FROM moneydrop WHERE channelID ="${channelID}"`);
       if(!row) {
-        await sql.run("INSERT INTO moneydrop (channelID, dropMoney, firstMin, firstMax, firstProbability, secondMin, secondMax, secondProbability, thirdMin, thirdMax, thirdProbability) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-         [channelID, enabled, 0, 20, 0.02, 20, 50, 0.005, 100, 300, 0.001]); //default amounts and probabilities
+        await sql.run("INSERT INTO moneydrop (channelID, dropMoney, pileSize, verbose, firstMin, firstMax, firstProbability, secondMin, secondMax, secondProbability, thirdMin, thirdMax, thirdProbability) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+         [channelID, 0, 0, 0, 0, 20, 0.02, 20, 50, 0.005, 100, 300, 0.001]); //default amounts and probabilities
       } else {
         await sql.run(`UPDATE moneydrop SET dropMoney = ${enabled} WHERE channelID = ${channelID}`);
       }
     } catch(e) {
       console.error(e);
       console.log("Creating table moneydrop");
-      await sql.run("CREATE TABLE IF NOT EXISTS moneydrop (channelID TEXT, dropMoney INTEGER, firstMin INTEGER, firstMax INTEGER, firstProbability FLOAT, secondMin INTEGER, secondMax INTEGER, secondProbability FLOAT, thirdMin INTEGER, thirdMax INTEGER, thirdProbability FLOAT)");
-      await sql.run("INSERT INTO moneydrop (channelID, dropMoney, firstMin, firstMax, firstProbability, secondMin, secondMax, secondProbability, thirdMin, thirdMax, thirdProbability) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-       [channelID, enabled, 0, 20, 0.02, 20, 50, 0.005, 100, 300, 0.001]); //default amounts and probabilities
+      await sql.run("CREATE TABLE IF NOT EXISTS moneydrop (channelID TEXT, dropMoney INTEGER, pileSize INTEGER, verbose INTEGER, firstMin INTEGER, firstMax INTEGER, firstProbability FLOAT, secondMin INTEGER, secondMax INTEGER, secondProbability FLOAT, thirdMin INTEGER, thirdMax INTEGER, thirdProbability FLOAT)");
+      await sql.run("INSERT INTO moneydrop (channelID, dropMoney, pileSize, verbose, firstMin, firstMax, firstProbability, secondMin, secondMax, secondProbability, thirdMin, thirdMax, thirdProbability) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+       [channelID, 0, 0, 0, 0, 20, 0.02, 20, 50, 0.005, 100, 300, 0.001]); //default amounts and probabilities
     }
     if (enabled == 1) {
       description += `Money drop **enabled** in ${channel}.\n`;
@@ -107,7 +117,7 @@ async function toggleMoneydrop(client, message, command, config, sql, channels, 
 async function setProperty(client, message, command, config, sql, channels) {
   let args = command.args;
 
-  if(args[1] === "firstMin" || args[1] === "firstMax"|| args[1] === "secondMin"|| args[1] === "secondMax"|| args[1] === "thirdMin"|| args[1] === "thirdMax") {
+  if(args[1] === "firstMin" || args[1] === "firstMax"|| args[1] === "secondMin"|| args[1] === "secondMax"|| args[1] === "thirdMin"|| args[1] === "thirdMax" || args[1] === "verbose") {
     let numberCheck = /\b\d+\b/;
     if(!numberCheck.test(args[2])) {
       return message.reply(`set ${args[1]} requires an integer.`);
@@ -118,7 +128,7 @@ async function setProperty(client, message, command, config, sql, channels) {
       return message.reply(`set ${args[1]} requires a decimal number between 0 and 1.`);
     }
   } else {
-    return message.reply("!moneydrop set options: `firstMin, firstMax, firstProbability, secondMin, secondMax, secondProbability, thirdMin, thirdMax, thirdProbability`");
+    return message.reply("!moneydrop set options: `verbose (0|1), firstMin, firstMax, firstProbability, secondMin, secondMax, secondProbability, thirdMin, thirdMax, thirdProbability`");
   }
 
   let description = "";
@@ -128,8 +138,8 @@ async function setProperty(client, message, command, config, sql, channels) {
     try {
       let row = await sql.get(`SELECT * FROM moneydrop WHERE channelID ="${channelID}"`);
       if(!row) {
-        await sql.run("INSERT INTO moneydrop (channelID, dropMoney, firstMin, firstMax, firstProbability, secondMin, secondMax, secondProbability, thirdMin, thirdMax, thirdProbability) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-         [channelID, 0, 0, 20, 0.02, 20, 50, 0.005, 100, 300, 0.001]); //default amounts and probabilities
+        await sql.run("INSERT INTO moneydrop (channelID, dropMoney, pileSize, verbose, firstMin, firstMax, firstProbability, secondMin, secondMax, secondProbability, thirdMin, thirdMax, thirdProbability) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+         [channelID, 0, 0, 0, 0, 20, 0.02, 20, 50, 0.005, 100, 300, 0.001]); //default amounts and probabilities
         await sql.run(`UPDATE moneydrop SET ${args[1]} = ${args[2]} WHERE channelID = ${channelID}`);
       } else {
         await sql.run(`UPDATE moneydrop SET ${args[1]} = ${args[2]} WHERE channelID = ${channelID}`);
@@ -137,9 +147,9 @@ async function setProperty(client, message, command, config, sql, channels) {
     } catch(e) {
       console.error(e);
       console.log("Creating table moneydrop");
-      await sql.run("CREATE TABLE IF NOT EXISTS moneydrop (channelID TEXT, dropMoney INTEGER, firstMin INTEGER, firstMax INTEGER, firstProbability FLOAT, secondMin INTEGER, secondMax INTEGER, secondProbability FLOAT, thirdMin INTEGER, thirdMax INTEGER, thirdProbability FLOAT)");
-      await sql.run("INSERT INTO moneydrop (channelID, dropMoney, firstMin, firstMax, firstProbability, secondMin, secondMax, secondProbability, thirdMin, thirdMax, thirdProbability) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-       [channelID, 0, 0, 20, 0.02, 20, 50, 0.005, 100, 300, 0.001]); //default amounts and probabilities
+      await sql.run("CREATE TABLE IF NOT EXISTS moneydrop (channelID TEXT, dropMoney INTEGER, pileSize INTEGER, verbose INTEGER, firstMin INTEGER, firstMax INTEGER, firstProbability FLOAT, secondMin INTEGER, secondMax INTEGER, secondProbability FLOAT, thirdMin INTEGER, thirdMax INTEGER, thirdProbability FLOAT)");
+      await sql.run("INSERT INTO moneydrop (channelID, dropMoney, pileSize, verbose, firstMin, firstMax, firstProbability, secondMin, secondMax, secondProbability, thirdMin, thirdMax, thirdProbability) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+       [channelID, 0, 0, 0, 0, 20, 0.02, 20, 50, 0.005, 100, 300, 0.001]); //default amounts and probabilities
       await sql.run(`UPDATE moneydrop SET ${args[1]} = ${args[2]} WHERE channelID = ${channelID}`);
     }
     description += `${channel} ${args[1]} set to ${args[2]}.\n`;
@@ -166,7 +176,7 @@ async function clearMoneydrop(client, message, command, config, sql, channels) {
     } catch(e) {
       console.error(e);
       console.log("Creating table moneydrop");
-      await sql.run("CREATE TABLE IF NOT EXISTS moneydrop (channelID TEXT, dropMoney INTEGER, firstMin INTEGER, firstMax INTEGER, firstProbability FLOAT, secondMin INTEGER, secondMax INTEGER, secondProbability FLOAT, thirdMin INTEGER, thirdMax INTEGER, thirdProbability FLOAT)");
+      await sql.run("CREATE TABLE IF NOT EXISTS moneydrop (channelID TEXT, dropMoney INTEGER, pileSize INTEGER, verbose INTEGER, firstMin INTEGER, firstMax INTEGER, firstProbability FLOAT, secondMin INTEGER, secondMax INTEGER, secondProbability FLOAT, thirdMin INTEGER, thirdMax INTEGER, thirdProbability FLOAT)");
     }
     description += `Money drop information cleared and drop **disabled** in ${channel}.\n`;
   }

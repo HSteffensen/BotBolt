@@ -4,6 +4,10 @@ const sql = require("sqlite");
 sql.open("./data/database.sqlite");
 const config = require("./config.json");
 const shortcut = require("./shortcut.json");
+let moneypileCache = {
+  refresh: true,
+  list: []
+};
 
 client.login(config.token);
 
@@ -14,8 +18,12 @@ client.on("ready", () => {
 client.on("message", async (message) => {
   if (message.author.bot) return; //ignore other bots
   let commands = parseForCommands(message.content);
+  let aliasCommands = [];
   for(let i = 0; i < commands.length; i++) {
     if (commands[i].type === "command") {
+      if(commands[i].name === "moneydrop") {
+        moneypileCache.refresh = true;
+      }
       await runCommand(commands[i], message);
     } else if (commands[i].type === "alias") {
       let unpackedLine = await unpackAlias(commands[i].name);
@@ -26,24 +34,27 @@ client.on("message", async (message) => {
             description: `\"${commands[i].name}\" => \"${unpackedLine}\"`
           }});
         }
-        let aliasCommands = parseForCommands(unpackedLine);
-        console.log(aliasCommands);
+        aliasCommands = parseForCommands(unpackedLine);
         for(let j = 0; j < aliasCommands.length; j++) {
           if(aliasCommands[j].type === "command") {
+            if(aliasCommands[i].name === "moneydrop") {
+              moneypileCache.refresh = true;
+            }
             await runCommand(aliasCommands[j], message);
           }
         }
       }
     }
   }
+  let moneypileFile = require("./routines/moneypile.js");
+  await moneypileFile.run(client, message, config, sql, moneypileCache);
 });
 
 async function runCommand(command, message) {
-  let commandName = (shortcut[command.name]) ? shortcut[command.name] : command.name;
   let commandSanitize = /\b\w+\b/; //test for anything other than [a-z], [A-Z], [0-9], or '_'. reject if found.
-  if(commandSanitize.test(commandName)) {
+  if(commandSanitize.test(command.name)) {
     try {
-      let commandFile = require(`./commands/${commandName}.js`);
+      let commandFile = require(`./commands/${command.name}.js`);
       await commandFile.run(client, message, command, config, sql, shortcut);
     } catch (err) {
       console.error(err);
@@ -52,7 +63,7 @@ async function runCommand(command, message) {
 }
 
 function parseForCommands(message) {
-  let commandRegexp = /([^\;]+\"[^\"]+\"[^\;]*|[^\;]+)/g; //splits commands by semicolon or allows semicolons inside a single pair of ""
+  let commandRegexp = /([^\;]+\"[^\"]*\"[^\;]*|[^\;]+)/g; //splits commands by semicolon or allows semicolons inside a single pair of ""
   let messageSplit = message.match(commandRegexp);
   let commands = messageSplit.map((line) => {
     line = line.trim();
@@ -60,8 +71,9 @@ function parseForCommands(message) {
     let lineSplit = line.split(" ");
     if(line.startsWith(config.commandPrefix)) {
       command.type = "command";
-      command.name = lineSplit[0].slice(config.commandPrefix.length);
-      command.shortcut = lineSplit[0].slice(config.commandPrefix.length);
+      let commandWord = lineSplit[0].slice(config.commandPrefix.length);
+      command.name = (shortcut[commandWord]) ? shortcut[commandWord] : commandWord;
+      command.shortcut = commandWord;
     } else if(line.startsWith(config.aliasPrefix)) {
       command.type = "alias";
       command.name = lineSplit[0].slice(config.aliasPrefix.length);
