@@ -5,5 +5,10 @@
   "take": "takemoney",
   "award": "addmoney",
   "playing": "setgame",
-  "dropmoney": "moneydrop"
+  "dropmoney": "moneydrop",
+  "grabmoney": "moneygrab",
+  "grab": "moneygrab",
+  "repeat": "echo",
+  "sleep": "wait",
+  "pause": "wait"
 }
