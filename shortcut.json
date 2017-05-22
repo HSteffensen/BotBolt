@@ -4,5 +4,6 @@
   "add": "addmoney",
   "take": "takemoney",
   "award": "addmoney",
-  "playing": "setgame"
+  "playing": "setgame",
+  "dropmoney": "moneydrop"
 }

@@ -58,6 +58,7 @@ function parseForCommands(message) {
     if(line.startsWith(config.commandPrefix)) {
       command.type = "command";
       command.name = lineSplit[0].slice(config.commandPrefix.length);
+      command.shortcut = lineSplit[0].slice(config.commandPrefix.length);
     } else if(line.startsWith(config.aliasPrefix)) {
       command.type = "alias";
       command.name = lineSplit[0].slice(config.aliasPrefix.length);

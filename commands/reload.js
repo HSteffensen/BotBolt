@@ -1,4 +1,4 @@
-exports.run = (client, message, command, config) => {
+exports.run = (client, message, command, config, sql, shortcut) => {
   let args = command.args;
   // Caller must be bot owner
   let permitted = false;
@@ -14,14 +14,15 @@ exports.run = (client, message, command, config) => {
     return message.reply("Permission denied: reload");
   }
 
+  let commandName = (shortcut[args[0]]) ? shortcut[args[0]] : args[0];
   if(!args || args.length < 1) {
     return message.reply("Bad request: must provide a command name to reload.");
   }
   // the path is relative to the *current folder*, so just ./filename.js
   try {
-    delete require.cache[require.resolve(`./${args[0]}.js`)];
+    delete require.cache[require.resolve(`./${commandName}.js`)];
   } catch(e) {
     return message.reply("Bad request: command \"" + args.join(" ") + "\" not found.");
   }
-  message.channel.send(`The command \"${args[0]}\" has been reloaded.`);
+  message.channel.send(`The command \"${commandName}\" has been reloaded.`);
 };
