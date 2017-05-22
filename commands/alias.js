@@ -1,7 +1,7 @@
 exports.run = async (client, message, command, config, sql) => {
   let args = command.args;
 
-  if(args.length < 2) {
+  if(args.length < 1) {
     return message.reply(`syntax: \`${config.commandPrefix}alias ${config.aliasPrefix}name \"command1;command2;etc\"\``);
   }
   if(!args[0].startsWith(config.aliasPrefix)) {
@@ -11,12 +11,10 @@ exports.run = async (client, message, command, config, sql) => {
   let aliasName = args[0].slice(config.aliasPrefix.length);
   let aliasCommands = args.slice(1).join(" ");
 
-  if(aliasCommands === "\"\"") {
+  if(aliasCommands === "\"\"" || args.length == 1) {
     try {
       let row = await sql.get(`SELECT * FROM alias WHERE name ="${aliasName}"`);
-      if(!row) {
-        await sql.run("INSERT INTO alias (name, commands) VALUES (?, ?)", [aliasName, aliasCommands]);
-      } else {
+      if(row) {
         await sql.run("DELETE FROM alias WHERE name = ?", [aliasName]);
       }
     } catch(e) {
@@ -30,6 +28,7 @@ exports.run = async (client, message, command, config, sql) => {
         description: `Removed alias \"${aliasName}\"`
       }});
     }
+    return;
   }
   if(!aliasCommands.startsWith("\"") || !aliasCommands.endsWith("\"")) {
     return message.reply(`syntax: \`${config.commandPrefix}alias ${config.aliasPrefix}name \"command1;command2;etc\"\`. Do not use quotes within the commands.`);
