@@ -18,7 +18,6 @@ client.on("message", async (message) => {
     let command = commands[i];
     if (command.type === "command") {
       let commandName = (shortcut[command.name]) ? shortcut[command.name] : command.name;
-      console.log(command.name + " " + shortcut[command.name] + " " + commandName);
       let commandSanitize = /\b\w+\b/; //test for anything other than [a-z], [A-Z], [0-9], or '_'. reject if found.
       if(commandSanitize.test(commandName)) {
         try {
@@ -28,12 +27,14 @@ client.on("message", async (message) => {
           console.error(err);
         }
       }
+    } else if (command.type === "alias") {
+
     }
   }
 });
 
 function parseForCommands(message) {
-  let commandRegexp = /([^\;]+\{[^\{\}]+\}[^\;]*|[^\;]+)/g; //splits commands by semicolon or allows semicolons inside a single pair of {}
+  let commandRegexp = /([^\;]+\"[^\"]+\"[^\;]*|[^\;]+)/g; //splits commands by semicolon or allows semicolons inside a single pair of ""
   let messageSplit = message.match(commandRegexp);
   let commands = messageSplit.map((line) => {
     line = line.trim();

@@ -1,3 +1,4 @@
+// From http://stackoverflow.com/a/39914235
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
