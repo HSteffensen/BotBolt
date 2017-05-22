@@ -3,6 +3,7 @@
   "commandPrefix": "!",
   "aliasPrefix": "!",
   "color": 44608,
+  "deleteTimer": 10,
   "ownerID": [
     123451234512345
   ]

@@ -57,7 +57,7 @@ async function checkMoneydrop(client, message, command, config, sql, channels) {
           "0": "None",
           "1": "Low",
           "2": "High"
-        }
+        };
         description += `${channel}\n`;
         description += `Enabled: ${(row.dropMoney == 1)}. Verbosity: ${verbosityOutput[row.verbosity]}\n`;
         description += `Drop: ${row.firstMin} to ${row.firstMax}, ${row.firstProbability} chance.\n`;
@@ -157,9 +157,9 @@ async function setProperty(client, message, command, config, sql, channels) {
       if(!row) {
         await sql.run("INSERT INTO moneydrop (channelID, dropMoney, pileSize, verbosity, firstMin, firstMax, firstProbability, secondMin, secondMax, secondProbability, thirdMin, thirdMax, thirdProbability) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
          [channelID, 0, 0, 0, 0, 20, 0.02, 20, 50, 0.005, 100, 300, 0.001]); //default amounts and probabilities
-        await sql.run(`UPDATE moneydrop SET ${args[1]} = ${args[2]} WHERE channelID = ${channelID}`);
+        await sql.run(`UPDATE moneydrop SET ${args[1]} = ${input} WHERE channelID = ${channelID}`);
       } else {
-        await sql.run(`UPDATE moneydrop SET ${args[1]} = ${args[2]} WHERE channelID = ${channelID}`);
+        await sql.run(`UPDATE moneydrop SET ${args[1]} = ${input} WHERE channelID = ${channelID}`);
       }
     } catch(e) {
       console.error(e);
@@ -167,9 +167,18 @@ async function setProperty(client, message, command, config, sql, channels) {
       await sql.run("CREATE TABLE IF NOT EXISTS moneydrop (channelID TEXT, dropMoney INTEGER, pileSize INTEGER, verbosity INTEGER, firstMin INTEGER, firstMax INTEGER, firstProbability FLOAT, secondMin INTEGER, secondMax INTEGER, secondProbability FLOAT, thirdMin INTEGER, thirdMax INTEGER, thirdProbability FLOAT)");
       await sql.run("INSERT INTO moneydrop (channelID, dropMoney, pileSize, verbosity, firstMin, firstMax, firstProbability, secondMin, secondMax, secondProbability, thirdMin, thirdMax, thirdProbability) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
        [channelID, 0, 0, 0, 0, 20, 0.02, 20, 50, 0.005, 100, 300, 0.001]); //default amounts and probabilities
-      await sql.run(`UPDATE moneydrop SET ${args[1]} = ${args[2]} WHERE channelID = ${channelID}`);
+      await sql.run(`UPDATE moneydrop SET ${args[1]} = ${input} WHERE channelID = ${channelID}`);
     }
-    description += `${channel} ${args[1]} set to ${args[2]}.\n`;
+    if(args[1] === "verbosity") {
+      let verbosityOutput = {
+        "0": "none",
+        "1": "low",
+        "2": "high"
+      };
+      description += `${channel} ${args[1]} set to ${verbosityOutput[input]}.\n`;
+    } else {
+      description += `${channel} ${args[1]} set to ${input}.\n`;
+    }
   }
 
   // Can't be silent or more verbose.

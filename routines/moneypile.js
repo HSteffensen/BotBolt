@@ -1,6 +1,6 @@
 exports.run = async (client, message, config, sql, data) => {
   if(data.refresh) {
-    await refreshMoneypileCache(sql, data); //should be run every time !moneydrop or !moneygrab is called ever.
+    return await refreshMoneypileCache(sql, data); //should be run every time !moneydrop or !moneygrab is called ever.
   }
 
   let channelData = null;
@@ -10,7 +10,7 @@ exports.run = async (client, message, config, sql, data) => {
       break;
     }
   }
-  if(channelData == null) {
+  if(channelData == null || channelData.dropMoney == 0) {
     return;
   }
 
@@ -38,6 +38,22 @@ exports.run = async (client, message, config, sql, data) => {
       await refreshMoneypileCache(sql, data);
     }
 
+    if(channelData.verbosity == 1) {
+      if(Math.random() < 0.1) { //one in every 10 drops
+        try {
+          let alertMsg = await message.channel.send("", {embed: {
+            color: config.color,
+            description: `There is a pile of money with \$${result}.`
+          }});
+          if(message.channel.permissionsFor(client.user).has("MANAGE_MESSAGES")) {
+            await sleep(config.deleteTimer * 1000);
+            await alertMsg.delete();
+          }
+        } catch(e) {
+          console.log(e);
+        }
+      }
+    }
     if(channelData.verbosity == 2) {
       message.channel.send("", {embed: {
         color: config.color,
@@ -59,4 +75,9 @@ async function refreshMoneypileCache(sql, data) {
     await sql.run("CREATE TABLE IF NOT EXISTS moneydrop (channelID TEXT, dropMoney INTEGER, pileSize INTEGER, verbosity INTEGER, firstMin INTEGER, firstMax INTEGER, firstProbability FLOAT, secondMin INTEGER, secondMax INTEGER, secondProbability FLOAT, thirdMin INTEGER, thirdMax INTEGER, thirdProbability FLOAT)");
     data.list = [];
   }
+}
+
+// From http://stackoverflow.com/a/39914235
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }

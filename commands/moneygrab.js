@@ -60,7 +60,7 @@ exports.run = async (client, message, command, config, sql) => {
         description: `${author.tag} grabbed \$${grabbed} from the money pile.`
       }});
       if(channel.permissionsFor(client.user).has("MANAGE_MESSAGES")) {
-        await sleep(10 * 1000);
+        await sleep(config.deleteTimer * 1000);
         await alertMsg.delete();
       }
     } catch(e) {
