@@ -31,7 +31,7 @@ exports.run = (client, message, command, config, sql, shortcut) => {
   try {
     delete require.cache[require.resolve(`./${commandName}.js`)];
   } catch(e) {
-    return message.reply(`Bad request: routine \"${commandName}\" not found.`);
+    return message.reply(`Bad request: command \"${commandName}\" not found.`);
   }
   message.channel.send(`The command \"${commandName}\" has been reloaded.`);
 };
