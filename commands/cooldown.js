@@ -94,13 +94,13 @@ async function checkCooldown(client, message, command, config, sql, commandName)
     await sql.run("CREATE TABLE IF NOT EXISTS cooldowns (commandName TEXT, downtime INTEGER, verbosity INTEGER, punishment INTEGER)");
   }
 
-  let verbosityOutput = ["is disabled", "is enabled", "defaults to global setting"];
+  let verbosityOutput = ["\"none\"", "\"low\"", "\"high\"", "default to global setting"];
 
   if(!exists) {
     description = `**!${commandName}** has no cooldown configuration.`;
   } else {
     description += `Cooldown for **!${commandName}** is ${time} seconds.\n`;
-    description += `Time left alert ${verbosityOutput[verbosity]}.\n`;
+    description += `Time left alert set to ${verbosityOutput[verbosity]}.\n`;
     description += `Punishment is ${punishment} added seconds.\n`;
   }
 

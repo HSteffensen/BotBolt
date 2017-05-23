@@ -1,5 +1,6 @@
 exports.run = async (client, message, config, sql, data) => {
   if(data.refresh) {
+    //returns because !moneydrop and !grab should not generate money.
     return await refreshMoneypileCache(sql, data); //should be run every time !moneydrop or !moneygrab is called ever.
   }
 

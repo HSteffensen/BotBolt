@@ -4,6 +4,12 @@ exports.checkCooldown = async (client, message, command, config, sql, data) => {
   let commandName = command.name;
   let timestamp = message.createdTimestamp;
 
+  if(data.refresh && command.name !== "cooldown") {
+    await refreshCooldownCache(sql, data); //should be run after time !cooldown is called ever
+  }
+
+  console.log(data);
+
   if(data.commands.hasOwnProperty(commandName) && data.commands[commandName].downtime > 0 && data.timers.hasOwnProperty(authorID + commandName)) {
     let timer = data.timers[authorID + commandName];
     let endTime = timer.startTime + timer.downtime;
@@ -24,10 +30,6 @@ exports.updateCooldown = async (client, message, command, config, sql, data) => 
   }
   let timestamp = message.createdTimestamp;
   let downtime = data.commands[commandName].downtime;
-
-  if(data.refresh) {
-    await refreshCooldownCache(sql, data); //should be run after time !cooldown is called ever
-  }
 
   data.timers[authorID + commandName] = {
     userIDcommandName: authorID + commandName,
@@ -50,7 +52,6 @@ exports.updateCooldown = async (client, message, command, config, sql, data) => 
     await sql.run("CREATE TABLE IF NOT EXISTS cooldownTimers (userIDcommandName TEXT, userID TEXT, commandName TEXT, startTime INTEGER, downtime INTEGER)");
     await sql.run("INSERT INTO cooldownTimers (userIDcommandName, userID, commandName, startTime, downtime) VALUES (?, ?, ?, ?, ?)", [authorID + commandName, authorID, commandName, timestamp, downtime]);
   }
-
 };
 
 exports.punish = async (client, message, command, config, sql, data) => {
@@ -64,7 +65,7 @@ exports.punish = async (client, message, command, config, sql, data) => {
   if(commandData.punishment > 0) {
     data.timers[authorID + commandName].downtime += commandData.punishment * 1000;
     if(commandData.verbosity == 2) {
-      description = `\n${commandData.punishment} seconds added to your timer.\n`;
+      description = `\n${commandData.punishment} seconds added to your timer.`;
     }
     try {
       await sql.run("UPDATE cooldownTimers SET downtime = ? WHERE userIDcommandName = ?", [data.downtime, authorID + commandName]);
@@ -76,15 +77,23 @@ exports.punish = async (client, message, command, config, sql, data) => {
   if(commandData.verbosity == 2) {
     let timer = data.timers[authorID + commandName];
     let timeleft = Math.ceil((timer.startTime + timer.downtime - timestamp) / 1000);
-    description += `${timeleft} seconds until you can use **!${commandName}**.`;
+    description += `\n${timeleft} seconds until you can use **!${commandName}**.`;
   }
 
   if(commandData.verbosity == 1 || commandData.verbosity == 2) {
     description = `You are on cooldown for **!${commandName}**.` + description;
-    message.channel.send("", {embed: {
-      color: config.color,
-      description: description
-    }});
+    try {
+      let alertMsg = await message.channel.send("", {embed: {
+        color: config.color,
+        description: description
+      }});
+      if(message.channel.permissionsFor(client.user).has("MANAGE_MESSAGES")) {
+        await sleep(config.deleteTimer * 1000);
+        await alertMsg.delete();
+      }
+    } catch(e) {
+      console.log(e);
+    }
   }
 };
 
@@ -110,4 +119,9 @@ async function refreshCooldownCache(sql, data) {
     console.log("Creating table cooldowns");
     await sql.run("CREATE TABLE IF NOT EXISTS cooldowns (commandName TEXT, downtime INTEGER, verbosity INTEGER, punishment INTEGER)");
   }
+}
+
+// From http://stackoverflow.com/a/39914235
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
