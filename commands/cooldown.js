@@ -18,6 +18,10 @@ exports.run = async (client, message, command, config, sql, shortcut) => {
     return message.reply("Bad request: must provide a command name.");
   }
 
+  if(args[0] === "reloaddefaults") {
+    return await reloaddefaultCooldowns(client, message, command, config, sql);
+  }
+
   let commandName = args[0];
   if(commandName.startsWith(config.commandPrefix)) {
     commandName = commandName.slice(config.commandPrefix.length);
@@ -211,4 +215,35 @@ async function setPunishment(client, message, command, config, sql, commandName)
     color: config.color,
     description: `Punishment for calling **!${commandName}** during cooldown set to ${punishment} added seconds.`
   }});
+}
+
+async function reloaddefaultCooldowns(client, message, command, config, sql) {
+  let description = "";
+  let cooldownDefaults = require("../data/cooldownDefaults.json");
+  let defaultsList = cooldownDefaults.list;
+  for(let i = 0; i < defaultsList.length; i++) {
+    let commandName = defaultsList[i].name;
+    let downtime = defaultsList[i].cooldownSeconds;
+    let punishment = defaultsList[i].punishmentSeconds;
+    try {
+      let row = await sql.get(`SELECT * FROM cooldowns WHERE commandName ="${commandName}"`);
+      if(!row) {
+        await sql.run("INSERT INTO cooldowns (commandName, downtime, verbosity, punishment) VALUES (?, ?, ?, ?)", [commandName, downtime, 3, punishment]);
+      } else {
+        await sql.run("UPDATE cooldowns SET downtime = ?, punishment = ? WHERE commandName = ?", [downtime, punishment, commandName]);
+      }
+    } catch(e) {
+      console.error(e);
+      console.log("Creating table cooldowns");
+      await sql.run("CREATE TABLE IF NOT EXISTS cooldowns (commandName TEXT, downtime INTEGER, verbosity INTEGER, punishment INTEGER)");
+      await sql.run("INSERT INTO cooldowns (commandName, downtime, verbosity, punishment) VALUES (?, ?, ?, ?)", [commandName, downtime, 3, punishment]);
+    }
+    description += `Set **!${commandName}** cooldown to ${downtime} seconds with a punishment of ${punishment} added seconds.\n`;
+  }
+  if(!command.silent) {
+    message.channel.send("", {embed: {
+      color: config.color,
+      description: description
+    }});
+  }
 }

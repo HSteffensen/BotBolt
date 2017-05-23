@@ -2,7 +2,8 @@
   "list": [
     {
       "name": "moneygrab",
-      "cooldownSeconds": 3600
+      "cooldownSeconds": 3600,
+      "punishmentSeconds": 0
     }
   ]
 }
