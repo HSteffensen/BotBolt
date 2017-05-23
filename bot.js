@@ -54,8 +54,11 @@ async function runCommand(command, message) {
   let commandSanitize = /\b\w+\b/; //test for anything other than [a-z], [A-Z], [0-9], or '_'. reject if found.
   if(commandSanitize.test(command.name)) {
     try {
-      let commandFile = require(`./commands/${command.name}.js`);
-      await commandFile.run(client, message, command, config, sql, shortcut);
+      let cooldownsFile = require("./routines/cooldowns.js");
+      if(cooldownsFile.run(client, message, command, config, sql)) {
+        let commandFile = require(`./commands/${command.name}.js`);
+        await commandFile.run(client, message, command, config, sql, shortcut);
+      }
     } catch (err) {
       console.error(err);
     }
