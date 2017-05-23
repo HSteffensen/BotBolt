@@ -55,7 +55,7 @@ async function runCommand(command, message) {
   if(commandSanitize.test(command.name)) {
     try {
       let cooldownsFile = require("./routines/cooldowns.js");
-      if(cooldownsFile.run(client, message, command, config, sql)) {
+      if(await cooldownsFile.run(client, message, command, config, sql)) {
         let commandFile = require(`./commands/${command.name}.js`);
         await commandFile.run(client, message, command, config, sql, shortcut);
       }

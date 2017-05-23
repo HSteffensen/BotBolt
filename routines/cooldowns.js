@@ -5,4 +5,5 @@ exports.run = async (client, message, command, config, sql) => {
   let timestamp = message.createdTimestamp;
 
   //console.log(timestamp);
+  return true;
 };
