@@ -27,14 +27,14 @@ exports.updateCooldown = async (client, message, command, config, sql, data) => 
     return;
   }
   let timestamp = message.createdTimestamp;
-  let downtime = data.commands[commandName].downtime;
+  let downtime = data.commands[commandName].downtime * 1000;
 
   data.timers[authorID + commandName] = {
     userIDcommandName: authorID + commandName,
     userID: authorID,
     commandName: commandName,
     startTime: timestamp,
-    downtime: downtime * 1000
+    downtime: downtime
   };
 
   try {
