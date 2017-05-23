@@ -8,6 +8,11 @@ let moneypileCache = {
   refresh: true,
   list: []
 };
+let cooldownCache = {
+  refresh: true,
+  commands: {},
+  timers: {}
+};
 
 client.login(config.token);
 
@@ -21,9 +26,6 @@ client.on("message", async (message) => {
   let aliasCommands = [];
   for(let i = 0; i < commands.length; i++) {
     if (commands[i].type === "command") {
-      if(commands[i].name === "moneydrop" || commands[i].name === "moneygrab") {
-        moneypileCache.refresh = true;
-      }
       await runCommand(commands[i], message);
     } else if (commands[i].type === "alias") {
       let unpackedLine = await unpackAlias(commands[i].name);
@@ -37,9 +39,6 @@ client.on("message", async (message) => {
         aliasCommands = parseForCommands(unpackedLine);
         for(let j = 0; j < aliasCommands.length; j++) {
           if(aliasCommands[j].type === "command") {
-            if(aliasCommands[j].name === "moneydrop" || commands[i].name === "moneygrab") {
-              moneypileCache.refresh = true;
-            }
             await runCommand(aliasCommands[j], message);
           }
         }
@@ -51,13 +50,23 @@ client.on("message", async (message) => {
 });
 
 async function runCommand(command, message) {
+  if(command.name === "moneydrop" || command.name === "moneygrab") {
+    moneypileCache.refresh = true;
+  }
+  if(command.name === "cooldown") {
+    cooldownCache.refresh = true;
+  }
   let commandSanitize = /\b\w+\b/; //test for anything other than [a-z], [A-Z], [0-9], or '_'. reject if found.
   if(commandSanitize.test(command.name)) {
     try {
       let cooldownsFile = require("./routines/cooldowns.js");
-      if(await cooldownsFile.run(client, message, command, config, sql)) {
+      let cooldownOK = await cooldownsFile.checkCooldown(client, message, command, config, sql, cooldownCache);
+      if(cooldownOK) {
         let commandFile = require(`./commands/${command.name}.js`);
         await commandFile.run(client, message, command, config, sql, shortcut);
+        await cooldownsFile.updateCooldown(client, message, command, config, sql, cooldownCache);
+      } else {
+        await cooldownsFile.punish(client, message, command, config, sql, cooldownCache);
       }
     } catch (err) {
       console.error(err);

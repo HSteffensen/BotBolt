@@ -34,6 +34,10 @@ exports.run = async (client, message, command, config, sql, shortcut) => {
     return await checkCooldown(client, message, command, config, sql, commandName);
   }
 
+  if(commandName === "cooldown") {
+    return message.reply("Bad request: do not put a cooldown on \"cooldown\".");
+  }
+
   let numberCheck = /\b\d+\b/;
 
   if(args[1] === "remove") {
@@ -41,16 +45,15 @@ exports.run = async (client, message, command, config, sql, shortcut) => {
   }
 
   if(args[1] === "verbosity") {
-    let verbosityCheck = /\b(0|1|2|off|on|default|enable|disable)\b/;
+    let verbosityCheck = /\b(0|1|2|3|none|low|high|default)\b/;
     if(!verbosityCheck.test(args[2])) {
-      return message.reply("verbosity requires 0, 1, or 2.");
+      return message.reply("verbosity requires 0, 1, 2, or default.");
     }
     let verbosityMap = {
-      "off": "0",
-      "on": "1",
-      "disable": "0",
-      "enable": "1",
-      "default": "2"
+      "none": "0",
+      "low": "1",
+      "high": "2",
+      "default": "3"
     };
     let input = (verbosityMap[args[2]]) ? verbosityMap[args[2]] : args[2];
     return await setVerbosity(client, message, command, config, sql, commandName, input);
@@ -114,7 +117,7 @@ async function setCooldown(client, message, command, config, sql, commandName) {
   try {
     let row = await sql.get(`SELECT * FROM cooldowns WHERE commandName ="${commandName}"`);
     if(!row) {
-      await sql.run("INSERT INTO cooldowns (commandName, downtime, verbosity, punishment) VALUES (?, ?, ?, ?)", [commandName, time, 2, 0]);
+      await sql.run("INSERT INTO cooldowns (commandName, downtime, verbosity, punishment) VALUES (?, ?, ?, ?)", [commandName, time, 3, 0]);
     } else {
       await sql.run("UPDATE cooldowns SET downtime = ? WHERE commandName = ?", [time, commandName]);
     }
@@ -122,7 +125,7 @@ async function setCooldown(client, message, command, config, sql, commandName) {
     console.error(e);
     console.log("Creating table cooldowns");
     await sql.run("CREATE TABLE IF NOT EXISTS cooldowns (commandName TEXT, downtime INTEGER, verbosity INTEGER, punishment INTEGER)");
-    await sql.run("INSERT INTO cooldowns (commandName, downtime, verbosity, punishment) VALUES (?, ?, ?, ?)", [commandName, time, 2, 0]);
+    await sql.run("INSERT INTO cooldowns (commandName, downtime, verbosity, punishment) VALUES (?, ?, ?, ?)", [commandName, time, 3, 0]);
   }
 
   message.channel.send("", {embed: {
@@ -175,7 +178,7 @@ async function setVerbosity(client, message, command, config, sql, commandName, 
     await sql.run("INSERT INTO cooldowns (commandName, downtime, verbosity, punishment) VALUES (?, ?, ?, ?)", [commandName, 0, verbosity, 0]);
   }
 
-  let verbosityOutput = ["disabled", "enabled", "default to global setting"];
+  let verbosityOutput = ["\"none\"", "\"low\"", "\"high\"", "default to global setting"];
 
   message.channel.send("", {embed: {
     color: config.color,
@@ -189,7 +192,7 @@ async function setPunishment(client, message, command, config, sql, commandName)
   try {
     let row = await sql.get(`SELECT * FROM cooldowns WHERE commandName ="${commandName}"`);
     if(!row) {
-      await sql.run("INSERT INTO cooldowns (commandName, downtime, verbosity, punishment) VALUES (?, ?, ?, ?)", [commandName, 0, 2, punishment]);
+      await sql.run("INSERT INTO cooldowns (commandName, downtime, verbosity, punishment) VALUES (?, ?, ?, ?)", [commandName, 0, 3, punishment]);
     } else {
       await sql.run("UPDATE cooldowns SET punishment = ? WHERE commandName = ?", [punishment, commandName]);
     }
@@ -197,7 +200,7 @@ async function setPunishment(client, message, command, config, sql, commandName)
     console.error(e);
     console.log("Creating table cooldowns");
     await sql.run("CREATE TABLE IF NOT EXISTS cooldowns (commandName TEXT, downtime INTEGER, verbosity INTEGER, punishment INTEGER)");
-    await sql.run("INSERT INTO cooldowns (commandName, downtime, verbosity, punishment) VALUES (?, ?, ?, ?)", [commandName, 0, 2, punishment]);
+    await sql.run("INSERT INTO cooldowns (commandName, downtime, verbosity, punishment) VALUES (?, ?, ?, ?)", [commandName, 0, 3, punishment]);
   }
 
   message.channel.send("", {embed: {
