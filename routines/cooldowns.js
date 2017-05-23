@@ -8,8 +8,6 @@ exports.checkCooldown = async (client, message, command, config, sql, data) => {
     await refreshCooldownCache(sql, data); //should be run after time !cooldown is called ever
   }
 
-  console.log(data);
-
   if(data.commands.hasOwnProperty(commandName) && data.commands[commandName].downtime > 0 && data.timers.hasOwnProperty(authorID + commandName)) {
     let timer = data.timers[authorID + commandName];
     let endTime = timer.startTime + timer.downtime;

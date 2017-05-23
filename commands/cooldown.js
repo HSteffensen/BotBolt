@@ -121,6 +121,9 @@ async function setCooldown(client, message, command, config, sql, commandName) {
     } else {
       await sql.run("UPDATE cooldowns SET downtime = ? WHERE commandName = ?", [time, commandName]);
     }
+    if(time === "0") {
+      await sql.run("DELETE FROM cooldownTimers WHERE commandName = ?", [commandName]);
+    }
   } catch(e) {
     console.error(e);
     console.log("Creating table cooldowns");
@@ -145,6 +148,7 @@ async function removeCooldown(client, message, command, config, sql, commandName
       exists = true;
       await sql.run("DELETE FROM cooldowns WHERE commandName = ?", [commandName]);
     }
+    await sql.run("DELETE FROM cooldownTimers WHERE commandName = ?", [commandName]);
   } catch(e) {
     console.error(e);
     console.log("Creating table cooldowns");
