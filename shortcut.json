@@ -1,8 +1,12 @@
 {
   "$": "money",
+  "r": "reload",
   "give": "givemoney",
+  "moneygive": "givemoney",
   "add": "addmoney",
+  "moneyadd": "addmoney",
   "take": "takemoney",
+  "moneytake": "takemoney",
   "award": "addmoney",
   "playing": "setgame",
   "dropmoney": "moneydrop",
@@ -10,5 +14,6 @@
   "grab": "moneygrab",
   "repeat": "echo",
   "sleep": "wait",
-  "pause": "wait"
+  "pause": "wait",
+  "maze": "hedgemaze"
 }

@@ -129,9 +129,9 @@ async function setProperty(client, message, command, config, sql, channels) {
       return message.reply(`set ${args[1]} requires an integer.`);
     }
   } else if(args[1] === "firstProbability" || args[1] === "secondProbability" || args[1] === "thirdProbability") {
-    let numberCheck = /\b0\.\d+\b/;
+    let numberCheck = /\b(0|0\.\d+|1)\b/;
     if(!numberCheck.test(input)) {
-      return message.reply(`set ${args[1]} requires a decimal number between 0 and 1.`);
+      return message.reply(`set ${args[1]} requires a decimal number from 0 to 1.`);
     }
   }  else if(args[1] === "verbosity") {
     let verbosityCheck = /\b(0|1|2|none|low|high)\b/;

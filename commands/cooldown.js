@@ -39,10 +39,8 @@ exports.run = async (client, message, command, config, sql, shortcut) => {
   }
 
   if(commandName === "cooldown") {
-    return message.reply("Bad request: do not put a cooldown on \"cooldown\".");
+    return message.reply("Bad request: do not put cooldown on cooldown.");
   }
-
-  let numberCheck = /\b\d+\b/;
 
   if(args[1] === "remove") {
     return await removeCooldown(client, message, command, config, sql, commandName);
@@ -62,6 +60,8 @@ exports.run = async (client, message, command, config, sql, shortcut) => {
     let input = (verbosityMap[args[2]]) ? verbosityMap[args[2]] : args[2];
     return await setVerbosity(client, message, command, config, sql, commandName, input);
   }
+
+  let numberCheck = /\b\d+\b/;
 
   if(args[1] === "punishment" || args[1] === "punish") {
     if(!numberCheck.test(args[2])) {

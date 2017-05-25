@@ -70,7 +70,7 @@ exports.run = async (client, message, command, config, sql) => {
   if(verbosity == 2) {
     channel.send("", {embed: {
       color: config.color,
-      description: `**${author.tag}** grabbed \$${grabbed} from the money pile.\n**${author.tag}** ${balance} => ${total}.`
+      description: `**${author.tag}** grabbed \$${grabbed} from the money pile.\nThere is a pile of money with \$${remaining}.\n**${author.tag}** ${balance} => ${total}.`
     }});
   }
 };

@@ -33,5 +33,7 @@ exports.run = (client, message, command, config, sql, shortcut) => {
   } catch(e) {
     return message.reply(`Bad request: command \"${commandName}\" not found.`);
   }
-  message.channel.send(`The command \"${commandName}\" has been reloaded.`);
+  let description = `The command \"${commandName}\" has been reloaded.`;
+  message.channel.send(description);
+  console.log(description);
 };

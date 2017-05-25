@@ -13,6 +13,9 @@ let cooldownCache = {
   commands: {},
   timers: {}
 };
+let noncommandData = {
+  
+};
 
 client.login(config.token);
 
@@ -63,7 +66,7 @@ async function runCommand(command, message) {
       let cooldownOK = await cooldownsFile.checkCooldown(client, message, command, config, sql, cooldownCache);
       if(cooldownOK) {
         let commandFile = require(`./commands/${command.name}.js`);
-        await commandFile.run(client, message, command, config, sql, shortcut);
+        await commandFile.run(client, message, command, config, sql, shortcut, noncommandData);
         await cooldownsFile.updateCooldown(client, message, command, config, sql, cooldownCache);
       } else {
         await cooldownsFile.punish(client, message, command, config, sql, cooldownCache);
