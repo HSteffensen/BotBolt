@@ -25,7 +25,7 @@ client.on("ready", () => {
 
 client.on("message", async (message) => {
   if (message.author.bot) return; //ignore other bots
-  let commands = parseForCommands(message.content);
+  let commands = parseForCommands(message.content, message.author.id);
   let aliasCommands = [];
   for(let i = 0; i < commands.length; i++) {
     if (commands[i].type === "command") {
@@ -39,7 +39,7 @@ client.on("message", async (message) => {
             description: `\"${commands[i].name}\" => \"${unpackedLine}\"`
           }});
         }
-        aliasCommands = parseForCommands(unpackedLine);
+        aliasCommands = parseForCommands(unpackedLine, message.author.id);
         for(let j = 0; j < aliasCommands.length; j++) {
           if(aliasCommands[j].type === "command") {
             await runCommand(aliasCommands[j], message);
@@ -67,8 +67,14 @@ async function runCommand(command, message) {
       let cooldownsFile = require("./routines/cooldowns.js");
       let cooldownOK = await cooldownsFile.checkCooldown(client, message, command, config, sql, cooldownCache);
       if(cooldownOK) {
-        let commandFile = require(`./commands/${command.name}.js`);
-        await commandFile.run(client, message, command, config, sql, shortcut, keywordData);
+        try {
+          let commandFile = require(`./commands/${command.name}.js`);
+          await commandFile.run(client, message, command, config, sql, shortcut, keywordData);
+        } catch (err) {
+          if(err.code !== "MODULE_NOT_FOUND") { //otherwise a module not found error would be logged for every !blahblahblah that isnt a command
+            console.log(err);
+          }
+        }
         await cooldownsFile.updateCooldown(client, message, command, config, sql, cooldownCache);
       } else {
         await cooldownsFile.punish(client, message, command, config, sql, cooldownCache);
@@ -80,12 +86,12 @@ async function runCommand(command, message) {
 }
 
 async function runKeyword(command, message) {
-  let kw = keywordData[message.author.id + command.name];
+  let kw = keywordData[command.name + message.author.id];
   let commandFile = require(`./commands/${kw.command}.js`);
   await commandFile.runKeyword(client, message, command, config, sql, keywordData);
 }
 
-function parseForCommands(message) {
+function parseForCommands(message, authorID) {
   let commandRegexp = /([^\;]+\"[^\"]*\"[^\;]*|[^\;]+)/g; //splits commands by semicolon or allows semicolons inside a single pair of ""
   let messageSplit = message.match(commandRegexp);
   let commands = messageSplit.map((line) => {
@@ -100,7 +106,7 @@ function parseForCommands(message) {
     } else if(line.startsWith(config.aliasPrefix)) {
       command.type = "alias";
       command.name = lineSplit[0].slice(config.aliasPrefix.length);
-    } else if(keywordData.hasOwnProperty(lineSplit[0] + message.author.id) || keywordData.hasOwnProperty(lineSplit[0] + "0")) {
+    } else if(keywordData.hasOwnProperty(lineSplit[0] + authorID) || keywordData.hasOwnProperty(lineSplit[0] + "0")) {
       command.type = "keyword";
       command.name = lineSplit[0];
     }
