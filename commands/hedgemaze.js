@@ -6,7 +6,7 @@ exports.run = async (client, message, command, config, sql, shortcut, noncommand
   if(size < 2 || size > 10) {
     message.reply("size must be between 2 and 10");
   }
-  let looping = false;
+  let looping = 0.2;
   let monsters = 0;
   let monsterIntelligence = 0;
   let reward = 0;
@@ -19,6 +19,7 @@ exports.run = async (client, message, command, config, sql, shortcut, noncommand
     monsterIntelligence: monsterIntelligence,
     reward: reward,
     location: [],
+    entrance: [],
     exit: [],
     world: [[]]
   };
@@ -72,6 +73,9 @@ function generateMaze(maze) {
   console.log("generating maze");
   let set = new DisjointSet2d(maze.size);
   let walls = [];
+  let loopAmount = maze.looping * (maze.size * maze.size + 1);
+  let loops = Math.round(loopAmount);
+
 
   //fill maze world with empty objects
   for(let i = 0; i < maze.size; i++) {
@@ -90,26 +94,112 @@ function generateMaze(maze) {
     }
   }
 
-  while(!set.united()) {
+  while(!set.united() || loops > 0) {
     //choose a random wall;
     let wallID = Math.floor(Math.random() * walls.length);
     let wall = walls[wallID];
     let pos1 = wall[0];
     let pos2 = wall[1];
-    if(!set.connected(pos1, pos2)) {
+    let connected = set.connected(pos1, pos2);
+    if(!connected || loops > 0) {
       let direction1to2 = wall[2];
       let direction2to1 = wall[3];
       maze.world[pos1[0]][pos1[1]][direction1to2] = pos2;
       maze.world[pos2[0]][pos2[1]][direction2to1] = pos1;
-      set.join(pos1, pos2);
+      if(connected) {
+        loops--;
+      } else {
+        set.join(pos1, pos2);
+      }
     }
     walls.splice(wallID, 1);
   }
 
-  //TODO: make actual way to choose start and goal
-  maze.location = [0, 0];
-  maze.exit = [maze.size-1, maze.size-1];
+  //choose a dead end to be the start, then let the farthest spot be the exit
+  let deadends = findDeadEnds(maze);
+  maze.entrance = deadends[0];
+  //maze.entrance = [0, 0];
+  maze.location = maze.entrance;
+  let farthestSpaces = findFarthestSpaces(maze, maze.entrance);
+  console.log(farthestSpaces);
+  maze.exit = farthestSpaces[0];
 
+}
+
+//returns list of dead ends
+function findDeadEnds(maze) {
+  let output = [];
+  let visited = [[]];
+  for(let i = 0; i < maze.size; i++) {
+    visited[i] = [];
+    for(let j = 0; j < maze.size; j++) {
+      visited[i][j] = false;
+    }
+  }
+
+  visited[0][0] = true;
+  let queue = [[0, 0]];
+
+  while(queue.length > 0) {
+    let [x, y] = queue.shift(); //cut off the front of the list
+    let optionsList = Object.keys(maze.world[x][y]);
+    if(optionsList.length == 1) {
+      output.push([x, y]);
+    }
+    let newLocations = optionsList.map((item) => {
+      return maze.world[x][y][item];
+    });
+    for(let i = 0; i < newLocations.length; i++) {
+      let [a, b] = newLocations[i];
+      if(!visited[a][b]) {
+        visited[a][b] = true;
+        queue.push([a, b]);
+      }
+    }
+  }
+
+  return output;
+}
+
+function findFarthestSpaces(maze, location) {
+  let maxDistance = 0;
+  let visited = [[]];
+  for(let i = 0; i < maze.size; i++) {
+    visited[i] = [];
+    for(let j = 0; j < maze.size; j++) {
+      visited[i][j] = 0;
+    }
+  }
+
+  visited[location[0]][location[1]] = 0;
+  let queue = [[location[0], location[1], 0]];
+
+  while(queue.length > 0) {
+    let [x, y, distance] = queue.shift(); //cut off the front of the list
+    maxDistance = (distance > maxDistance) ? distance : maxDistance;
+    let optionsList = Object.keys(maze.world[x][y]);
+    let newLocations = optionsList.map((item) => {
+      return maze.world[x][y][item];
+    });
+    for(let i = 0; i < newLocations.length; i++) {
+      let [a, b] = newLocations[i];
+      if(!visited[a][b]) {
+        visited[a][b] = distance + 1;
+        queue.push([a, b, distance + 1]);
+      }
+    }
+  }
+
+  //get list of all locations with the max distance
+  let output = [];
+  for(let i = 0; i < maze.size; i++) {
+    for(let j = 0; j < maze.size; j++) {
+      if(visited[i][j] == maxDistance) {
+        output.push([i, j]);
+      }
+    }
+  }
+  return output;
 }
 
 class DisjointSet2d {
@@ -194,10 +284,12 @@ function printout(maze) {
       output[row1] += (maze.world[i][j].hasOwnProperty("north")) ? "|" : " ";
       output[row1] += " ";
       output[row2] += (maze.world[i][j].hasOwnProperty("west")) ? "-" : " ";
-      if(maze.location[0] == i && maze.location[1] == j) {
-        output[row2] += "X";
+      if(maze.entrance[0] == i && maze.entrance[1] == j) {
+        output[row2] += "I"; //In
       } else if (maze.exit[0] == i && maze.exit[1] == j) {
-        output[row2] += "E";
+        output[row2] += "O"; //Out
+      } else if(maze.location[0] == i && maze.location[1] == j) {
+        output[row2] += "X"; //current location
       } else {
         output[row2] += "#";
       }
