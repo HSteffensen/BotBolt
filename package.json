@@ -1,15 +1,23 @@
 {
   "name": "botbolt",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "main": "bot.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC",
+  "license": "GNU General Public License v3.0",
   "dependencies": {
     "discord.js": "^11.1.0",
-    "sqlite": "^2.7.0"
-  }
+    "sqlite": "^2.8.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HSteffensen/BotBolt.git"
+  },
+  "bugs": {
+    "url": "https://github.com/HSteffensen/BotBolt/issues"
+  },
+  "homepage": "https://github.com/HSteffensen/BotBolt#readme",
+  "description": ""
 }
