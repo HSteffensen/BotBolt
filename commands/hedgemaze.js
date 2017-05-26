@@ -37,7 +37,8 @@ exports.run = async (client, message, command, config, sql, shortcut, noncommand
       }
     }
     if(permitted) {
-      return message.channel.send(printout(maze));
+      let output = printout(maze);
+      return message.channel.send(output);
     }
   }
 };
@@ -88,14 +89,11 @@ function generateMaze(maze) {
       walls.push([[i, j], [i, (j+1)%maze.size], "north", "south"]);
     }
   }
-  //console.log("walls: " + walls);
 
-  //TODO: suspected bug with disjoint set logic or implementation because sometimes a node would be in a group when it's corresponding location is not, causing the maze to not be connected
   while(!set.united()) {
     //choose a random wall;
     let wallID = Math.floor(Math.random() * walls.length);
     let wall = walls[wallID];
-    //console.log(walls.length + " :" + wall);
     let pos1 = wall[0];
     let pos2 = wall[1];
     if(!set.connected(pos1, pos2)) {
@@ -110,7 +108,7 @@ function generateMaze(maze) {
 
   //TODO: make actual way to choose start and goal
   maze.location = [0, 0];
-  maze.exit = [maze.size, maze.size];
+  maze.exit = [maze.size-1, maze.size-1];
 
 }
 
@@ -185,17 +183,17 @@ class DisjointSet2d {
 function printout(maze) {
   let output = ["```"];
   for(let j = maze.size - 1; j >= 0; j--) {
-    let row1 = (maze.size - j) * 3 - 2;
-    let row2 = (maze.size - j) * 3 - 1;
-    let row3 = (maze.size - j) * 3;
+    let row1 = (maze.size - j) * 2 - 1;
+    let row2 = (maze.size - j) * 2;
+    //let row3 = (maze.size - j) * 3;
     output[row1] = "";
     output[row2] = "";
-    output[row3] = "";
+    //output[row3] = "";
     for(let i = 0; i < maze.size; i++) {
       output[row1] += " ";
-      output[row1] += (maze.world[i][j].hasOwnProperty("north")) ? " " : "|";
+      output[row1] += (maze.world[i][j].hasOwnProperty("north")) ? "|" : " ";
       output[row1] += " ";
-      output[row2] += (maze.world[i][j].hasOwnProperty("west")) ? " " : "-";
+      output[row2] += (maze.world[i][j].hasOwnProperty("west")) ? "-" : " ";
       if(maze.location[0] == i && maze.location[1] == j) {
         output[row2] += "X";
       } else if (maze.exit[0] == i && maze.exit[1] == j) {
@@ -203,13 +201,12 @@ function printout(maze) {
       } else {
         output[row2] += "#";
       }
-      output[row2] += (maze.world[i][j].hasOwnProperty("east")) ? " " : "-";
-      output[row3] += " ";
-      output[row3] += (maze.world[i][j].hasOwnProperty("south")) ? " " : "|";
-      output[row3] += " ";
+      output[row2] += (maze.world[i][j].hasOwnProperty("east")) ? "-" : " ";
+      //output[row3] += " ";
+      //output[row3] += (maze.world[i][j].hasOwnProperty("south")) ? " " : "|";
+      //output[row3] += " ";
     }
   }
   output.push("\n```");
-  console.log(output);
-  return output;
+  return output.join("\n");
 }
