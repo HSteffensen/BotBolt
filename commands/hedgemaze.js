@@ -1,4 +1,4 @@
-exports.run = async (client, message, command, config, sql, shortcut, noncommandData) => {
+exports.run = async (client, message, command, config, sql, shortcut, keywordData) => {
   let fs = require("fs");
   let args = command.args;
 
@@ -11,13 +11,16 @@ exports.run = async (client, message, command, config, sql, shortcut, noncommand
   let monsterIntelligence = 0;
   let reward = 0;
   let print = true;
+  let verbosity = 1; //1 or 2, but stay as 1 for now
 
   let maze = {
     size: size,
+    verbosity: verbosity,
     looping: looping,
     monsters: monsters,
     monsterIntelligence: monsterIntelligence,
     reward: reward,
+    print: print,
     location: [],
     entrance: [],
     exit: [],
@@ -31,14 +34,12 @@ exports.run = async (client, message, command, config, sql, shortcut, noncommand
     fs.writeFile(mazeFilename, JSON.stringify(maze), (err) => {
       if (err) console.error(err);
       fs.close(fd, (err) => {
-        if (err){
-          console.log(err);
-        }
+        if (err) console.error(err);
       });
     });
   });
 
-  if(print) {
+  if(maze.print) {
     let permitted = false;
     for(let i = 0, len = config.ownerIDs.length; i < len; i++) {
       let owner = config.ownerIDs[i];
@@ -49,29 +50,70 @@ exports.run = async (client, message, command, config, sql, shortcut, noncommand
     }
     if(permitted) {
       let output = printout(maze);
-      return message.channel.send(output);
+      message.channel.send("```" + output + "```");
     }
   }
+
+  let choices = getChoices(maze);
+  for(let i = 0; i < choices.length; i++) {
+    let choice = choices[i];
+    keywordData[choice + message.author.id] = {
+      command: "hedgemaze"
+    };
+  }
+
+  let description = "You enter a hedgemaze. Find the exit to escape.\n";
+  reportStatus(message, command, config, maze, description);
 };
 
-exports.noncommand = async (client, message, command, config, sql, noncommandData) => {
+exports.runKeyword = async (client, message, command, config, sql, keywordData) => {
+  if(command.args.length > 0) {
+    return; //want the keyword to be alone
+  }
   //read in json
   let fs = require("fs");
-  let data = JSON.parse(fs.readFileSync(`../data/dataMaze_${message.author.id}.json`, "utf8"));
+  let mazeFilename = `data/dataMaze_${message.author.id}.json`;
+  fs.open(mazeFilename, "r+", (err, fd) => {
+    if (err) console.error(err);
+    let maze = JSON.parse(fs.readFileSync(`data/dataMaze_${message.author.id}.json`, "utf8"));
 
-  //do stuff
+    //TODO: do stuff
+    let direction = command.name;
+    let [x, y] = maze.location;
+    if(direction === "exit") {
+      if(maze.world[x][y].hasOwnProperty("exit")) {
+        //TODO: exit this bitch and update keywordData
+      }
+    } else {
+      if(maze.world[x][y].hasOwnProperty(direction)) {
+        let newLocation = maze.world[x][y][direction];
+        //TODO: relocate this bitch and update keywordData
+      }
+    }
 
-  reportStatus(message, command, config, data);
+    fs.writeFile(mazeFilename, JSON.stringify(maze), (err) => {
+      if (err) console.error(err);
+      fs.close(fd, (err) => {
+        if (err) console.error(err);
+      });
+    });
+    reportStatus(message, command, config, maze);
+  });
 };
 
-async function reportStatus (message, command, config, data) {
+async function reportStatus (message, command, config, maze, prefix) {
   let description = "";
-  if(data.verbosity == 1) {
+  if(prefix !== undefined) {
+    description = prefix;
+  }
+  let choices = getChoices(maze);
+  if(maze.verbosity == 1) {
+    description += `You can go: ${choices}.`;
     message.channel.send("", {embed: {
       color: config.color,
       description: description
     }});
-  } else if(data.verbosity == 2) {
+  } else if(maze.verbosity == 2) {
     message.channel.send("", {embed: {
       color: config.color,
       description: description
@@ -79,12 +121,11 @@ async function reportStatus (message, command, config, data) {
   }
 }
 
-function getChoices(maze, location) {
-  return Object.keys(maze.world[location[0]][location[1]]);
+function getChoices(maze) {
+  return Object.keys(maze.world[maze.location[0]][maze.location[1]]);
 }
 
 function generateMaze(maze) {
-  console.log("generating maze");
   let set = new DisjointSet2d(maze.size);
   let walls = [];
   let loopAmount = maze.looping * (maze.size * maze.size + 1);
@@ -135,7 +176,6 @@ function generateMaze(maze) {
   //maze.entrance = [0, 0];
   maze.location = maze.entrance;
   let farthestSpaces = findFarthestSpaces(maze, maze.entrance);
-  console.log(farthestSpaces);
   maze.exit = farthestSpaces[0];
   //give the exit location the option to exit
   maze.world[maze.exit[0]][maze.exit[1]]["exit"] = true;
@@ -287,10 +327,10 @@ class DisjointSet2d {
 }
 
 function printout(maze) {
-  let output = ["```"];
+  let output = [];
   for(let j = maze.size - 1; j >= 0; j--) {
-    let row1 = (maze.size - j) * 2 - 1;
-    let row2 = (maze.size - j) * 2;
+    let row1 = (maze.size - j - 1) * 2;
+    let row2 = (maze.size - j - 1) * 2 + 1;
     //let row3 = (maze.size - j) * 3;
     output[row1] = "";
     output[row2] = "";
@@ -315,6 +355,5 @@ function printout(maze) {
       //output[row3] += " ";
     }
   }
-  output.push("\n```");
   return output.join("\n");
 }

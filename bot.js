@@ -13,8 +13,8 @@ let cooldownCache = {
   commands: {},
   timers: {}
 };
-let noncommandData = {
-  
+let keywordData = {
+
 };
 
 client.login(config.token);
@@ -46,6 +46,8 @@ client.on("message", async (message) => {
           }
         }
       }
+    } else if (commands[i].type === "keyword") {
+      await runKeyword(commands[i], message);
     }
   }
   let moneypileFile = require("./routines/moneypile.js");
@@ -66,7 +68,7 @@ async function runCommand(command, message) {
       let cooldownOK = await cooldownsFile.checkCooldown(client, message, command, config, sql, cooldownCache);
       if(cooldownOK) {
         let commandFile = require(`./commands/${command.name}.js`);
-        await commandFile.run(client, message, command, config, sql, shortcut, noncommandData);
+        await commandFile.run(client, message, command, config, sql, shortcut, keywordData);
         await cooldownsFile.updateCooldown(client, message, command, config, sql, cooldownCache);
       } else {
         await cooldownsFile.punish(client, message, command, config, sql, cooldownCache);
@@ -75,6 +77,12 @@ async function runCommand(command, message) {
       console.error(err);
     }
   }
+}
+
+async function runKeyword(command, message) {
+  let kw = keywordData[message.author.id + command.name];
+  let commandFile = require(`./commands/${kw.command}.js`);
+  await commandFile.runKeyword(client, message, command, config, sql, keywordData);
 }
 
 function parseForCommands(message) {
@@ -92,6 +100,9 @@ function parseForCommands(message) {
     } else if(line.startsWith(config.aliasPrefix)) {
       command.type = "alias";
       command.name = lineSplit[0].slice(config.aliasPrefix.length);
+    } else if(keywordData.hasOwnProperty(lineSplit[0] + message.author.id) || keywordData.hasOwnProperty(lineSplit[0] + "0")) {
+      command.type = "keyword";
+      command.name = lineSplit[0];
     }
     command.silent = false;
     command.verbose = false;
