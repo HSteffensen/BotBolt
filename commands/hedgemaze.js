@@ -24,8 +24,18 @@ exports.run = async (client, message, command, config, sql, shortcut, noncommand
     world: [[]]
   };
   generateMaze(maze);
-  fs.writeFile(`../dataMaze_${message.author.id}.json`, JSON.stringify(maze), (err) => {
+
+  let mazeFilename = `data/dataMaze_${message.author.id}.json`;
+  fs.open(mazeFilename, "w", (err, fd) => {
     if (err) console.error(err);
+    fs.writeFile(mazeFilename, JSON.stringify(maze), (err) => {
+      if (err) console.error(err);
+      fs.close(fd, (err) => {
+        if (err){
+          console.log(err);
+        }
+      });
+    });
   });
 
   if(print) {
@@ -67,6 +77,10 @@ async function reportStatus (message, command, config, data) {
       description: description
     }});
   }
+}
+
+function getChoices(maze, location) {
+  return Object.keys(maze.world[location[0]][location[1]]);
 }
 
 function generateMaze(maze) {
@@ -123,6 +137,8 @@ function generateMaze(maze) {
   let farthestSpaces = findFarthestSpaces(maze, maze.entrance);
   console.log(farthestSpaces);
   maze.exit = farthestSpaces[0];
+  //give the exit location the option to exit
+  maze.world[maze.exit[0]][maze.exit[1]]["exit"] = true;
 
 }
 
