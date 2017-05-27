@@ -40,8 +40,10 @@ exports.run = async (client, message, command, config, sql) => {
       }
     } catch(e) {
       console.error(e);
-      console.log("Creating table alias");
-      await sql.run("CREATE TABLE IF NOT EXISTS alias (name TEXT, commands TEXT, isDefault INTEGER)");
+      if(e.message.startsWith("SQLITE_ERROR: no such table:")) {
+        console.log("Creating table alias");
+        await sql.run("CREATE TABLE IF NOT EXISTS alias (name TEXT, commands TEXT, isDefault INTEGER)");
+      }
     }
     if(!command.silent) {
       message.channel.send("", {embed: {
@@ -77,9 +79,11 @@ exports.run = async (client, message, command, config, sql) => {
     }
   } catch(e) {
     console.error(e);
-    console.log("Creating table alias");
-    await sql.run("CREATE TABLE IF NOT EXISTS alias (name TEXT, commands TEXT, isDefault INTEGER)");
-    await sql.run("INSERT INTO alias (name, commands, isDefault) VALUES (?, ?, ?)", [aliasName, aliasCommands, 0]);
+    if(e.message.startsWith("SQLITE_ERROR: no such table:")) {
+      console.log("Creating table alias");
+      await sql.run("CREATE TABLE IF NOT EXISTS alias (name TEXT, commands TEXT, isDefault INTEGER)");
+      await sql.run("INSERT INTO alias (name, commands, isDefault) VALUES (?, ?, ?)", [aliasName, aliasCommands, 0]);
+    }
   }
 
   if(!command.silent) {
@@ -106,9 +110,11 @@ async function reloadDefaultAliases(client, message, command, config, sql) {
       }
     } catch(e) {
       console.error(e);
-      console.log("Creating table alias");
-      await sql.run("CREATE TABLE IF NOT EXISTS alias (name TEXT, commands TEXT, isDefault INTEGER)");
-      await sql.run("INSERT INTO alias (name, commands, isDefault) VALUES (?, ?, ?)", [aliasName, aliasCommands, 1]);
+      if(e.message.startsWith("SQLITE_ERROR: no such table:")) {
+        console.log("Creating table alias");
+        await sql.run("CREATE TABLE IF NOT EXISTS alias (name TEXT, commands TEXT, isDefault INTEGER)");
+        await sql.run("INSERT INTO alias (name, commands, isDefault) VALUES (?, ?, ?)", [aliasName, aliasCommands, 1]);
+      }
     }
     description += `Set alias \"${aliasName}\" : \"${aliasCommands}\"\n`;
   }

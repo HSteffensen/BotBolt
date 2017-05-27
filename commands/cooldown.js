@@ -94,8 +94,10 @@ async function checkCooldown(client, message, command, config, sql, commandName)
     }
   } catch(e) {
     console.error(e);
-    console.log("Creating table cooldowns");
-    await sql.run("CREATE TABLE IF NOT EXISTS cooldowns (commandName TEXT, downtime INTEGER, verbosity INTEGER, punishment INTEGER)");
+    if(e.message.startsWith("SQLITE_ERROR: no such table:")) {
+      console.log("Creating table cooldowns");
+      await sql.run("CREATE TABLE IF NOT EXISTS cooldowns (commandName TEXT, downtime INTEGER, verbosity INTEGER, punishment INTEGER)");
+    }
   }
 
   let verbosityOutput = ["\"none\"", "\"low\"", "\"high\"", "default to global setting"];
@@ -130,9 +132,11 @@ async function setCooldown(client, message, command, config, sql, commandName) {
     }
   } catch(e) {
     console.error(e);
-    console.log("Creating table cooldowns");
-    await sql.run("CREATE TABLE IF NOT EXISTS cooldowns (commandName TEXT, downtime INTEGER, verbosity INTEGER, punishment INTEGER)");
-    await sql.run("INSERT INTO cooldowns (commandName, downtime, verbosity, punishment) VALUES (?, ?, ?, ?)", [commandName, time, 3, 0]);
+    if(e.message.startsWith("SQLITE_ERROR: no such table:")) {
+      console.log("Creating table cooldowns");
+      await sql.run("CREATE TABLE IF NOT EXISTS cooldowns (commandName TEXT, downtime INTEGER, verbosity INTEGER, punishment INTEGER)");
+      await sql.run("INSERT INTO cooldowns (commandName, downtime, verbosity, punishment) VALUES (?, ?, ?, ?)", [commandName, time, 3, 0]);
+    }
   }
 
   message.channel.send("", {embed: {
@@ -155,8 +159,10 @@ async function removeCooldown(client, message, command, config, sql, commandName
     await sql.run("DELETE FROM cooldownTimers WHERE commandName = ?", [commandName]);
   } catch(e) {
     console.error(e);
-    console.log("Creating table cooldowns");
-    await sql.run("CREATE TABLE IF NOT EXISTS cooldowns (commandName TEXT, downtime INTEGER, verbosity INTEGER, punishment INTEGER)");
+    if(e.message.startsWith("SQLITE_ERROR: no such table:")) {
+      console.log("Creating table cooldowns");
+      await sql.run("CREATE TABLE IF NOT EXISTS cooldowns (commandName TEXT, downtime INTEGER, verbosity INTEGER, punishment INTEGER)");
+    }
   }
 
   if(!exists) {
@@ -181,9 +187,11 @@ async function setVerbosity(client, message, command, config, sql, commandName, 
     }
   } catch(e) {
     console.error(e);
-    console.log("Creating table cooldowns");
-    await sql.run("CREATE TABLE IF NOT EXISTS cooldowns (commandName TEXT, downtime INTEGER, verbosity INTEGER, punishment INTEGER)");
-    await sql.run("INSERT INTO cooldowns (commandName, downtime, verbosity, punishment) VALUES (?, ?, ?, ?)", [commandName, 0, verbosity, 0]);
+    if(e.message.startsWith("SQLITE_ERROR: no such table:")) {
+      console.log("Creating table cooldowns");
+      await sql.run("CREATE TABLE IF NOT EXISTS cooldowns (commandName TEXT, downtime INTEGER, verbosity INTEGER, punishment INTEGER)");
+      await sql.run("INSERT INTO cooldowns (commandName, downtime, verbosity, punishment) VALUES (?, ?, ?, ?)", [commandName, 0, verbosity, 0]);
+    }
   }
 
   let verbosityOutput = ["\"none\"", "\"low\"", "\"high\"", "default to global setting"];
@@ -206,9 +214,11 @@ async function setPunishment(client, message, command, config, sql, commandName)
     }
   } catch(e) {
     console.error(e);
-    console.log("Creating table cooldowns");
-    await sql.run("CREATE TABLE IF NOT EXISTS cooldowns (commandName TEXT, downtime INTEGER, verbosity INTEGER, punishment INTEGER)");
-    await sql.run("INSERT INTO cooldowns (commandName, downtime, verbosity, punishment) VALUES (?, ?, ?, ?)", [commandName, 0, 3, punishment]);
+    if(e.message.startsWith("SQLITE_ERROR: no such table:")) {
+      console.log("Creating table cooldowns");
+      await sql.run("CREATE TABLE IF NOT EXISTS cooldowns (commandName TEXT, downtime INTEGER, verbosity INTEGER, punishment INTEGER)");
+      await sql.run("INSERT INTO cooldowns (commandName, downtime, verbosity, punishment) VALUES (?, ?, ?, ?)", [commandName, 0, 3, punishment]);
+    }
   }
 
   message.channel.send("", {embed: {
@@ -234,9 +244,11 @@ async function reloaddefaultCooldowns(client, message, command, config, sql) {
       }
     } catch(e) {
       console.error(e);
-      console.log("Creating table cooldowns");
-      await sql.run("CREATE TABLE IF NOT EXISTS cooldowns (commandName TEXT, downtime INTEGER, verbosity INTEGER, punishment INTEGER)");
-      await sql.run("INSERT INTO cooldowns (commandName, downtime, verbosity, punishment) VALUES (?, ?, ?, ?)", [commandName, downtime, 3, punishment]);
+      if(e.message.startsWith("SQLITE_ERROR: no such table:")) {
+        console.log("Creating table cooldowns");
+        await sql.run("CREATE TABLE IF NOT EXISTS cooldowns (commandName TEXT, downtime INTEGER, verbosity INTEGER, punishment INTEGER)");
+        await sql.run("INSERT INTO cooldowns (commandName, downtime, verbosity, punishment) VALUES (?, ?, ?, ?)", [commandName, downtime, 3, punishment]);
+      }
     }
     description += `Set **!${commandName}** cooldown to ${downtime} seconds with a punishment of ${punishment} added seconds.\n`;
   }

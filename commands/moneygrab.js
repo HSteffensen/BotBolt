@@ -31,10 +31,12 @@ exports.run = async (client, message, command, config, sql) => {
     }
   } catch(e) {
     console.error(e);
-    console.log("Creating table moneydrop");
-    await sql.run("CREATE TABLE IF NOT EXISTS moneydrop (channelID TEXT, dropMoney INTEGER, pileSize INTEGER, verbosity INTEGER, firstMin INTEGER, firstMax INTEGER, firstProbability FLOAT, secondMin INTEGER, secondMax INTEGER, secondProbability FLOAT, thirdMin INTEGER, thirdMax INTEGER, thirdProbability FLOAT)");
-    await sql.run("INSERT INTO moneydrop (channelID, dropMoney, pileSize, verbosity, firstMin, firstMax, firstProbability, secondMin, secondMax, secondProbability, thirdMin, thirdMax, thirdProbability) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-     [channelID, 0, 0, 0, 0, 20, 0.02, 20, 50, 0.005, 100, 300, 0.001]); //default amounts and probabilities
+    if(e.message.startsWith("SQLITE_ERROR: no such table:")) {
+      console.log("Creating table moneydrop");
+      await sql.run("CREATE TABLE IF NOT EXISTS moneydrop (channelID TEXT, dropMoney INTEGER, pileSize INTEGER, verbosity INTEGER, firstMin INTEGER, firstMax INTEGER, firstProbability FLOAT, secondMin INTEGER, secondMax INTEGER, secondProbability FLOAT, thirdMin INTEGER, thirdMax INTEGER, thirdProbability FLOAT)");
+      await sql.run("INSERT INTO moneydrop (channelID, dropMoney, pileSize, verbosity, firstMin, firstMax, firstProbability, secondMin, secondMax, secondProbability, thirdMin, thirdMax, thirdProbability) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+       [channelID, 0, 0, 0, 0, 20, 0.02, 20, 50, 0.005, 100, 300, 0.001]); //default amounts and probabilities
+    }
   }
 
   try {
@@ -48,9 +50,11 @@ exports.run = async (client, message, command, config, sql) => {
     }
   } catch(e) {
     console.error(e);
-    console.log("Creating table money");
-    await sql.run("CREATE TABLE IF NOT EXISTS money (userID TEXT, balance INTEGER)");
-    await sql.run("INSERT INTO money (userID, balance) VALUES (?, ?)", [authorID, grabbed]);
+    if(e.message.startsWith("SQLITE_ERROR: no such table:")) {
+      console.log("Creating table money");
+      await sql.run("CREATE TABLE IF NOT EXISTS money (userID TEXT, balance INTEGER)");
+      await sql.run("INSERT INTO money (userID, balance) VALUES (?, ?)", [authorID, grabbed]);
+    }
   }
 
   if(verbosity == 1) {
