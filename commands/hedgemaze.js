@@ -10,15 +10,16 @@ exports.run = async (client, message, command, config, sql, shortcut, keywordDat
   delete keywordData["east" + message.author.id];
   delete keywordData["west" + message.author.id];
 
-  fs.stat(mazeFilename, (err) => {
+  fs.stat(mazeFilename, async (err) => {
     if(err === null) { //already in a maze
       if(args[0] === "abandon") {
         fs.unlink(mazeFilename, (err) => {
           if (err) return console.error(err);
         });
+        removeFromMaze(sql, message.author.id);
         return message.channel.send("", {embed: {
           color: config.color,
-          description: "Maze abandoned."
+          description: "Hedgemaze abandoned."
         }});
       } else {
         maze = JSON.parse(fs.readFileSync(`data/dataMaze_${message.author.id}.json`, "utf8"));
@@ -29,10 +30,18 @@ exports.run = async (client, message, command, config, sql, shortcut, keywordDat
             command: "hedgemaze"
           };
         }
-        description = "You are already in a maze. Your choices have been reloaded.";
+        addToMaze(sql, message.author.id);
+        description = "You are already in a hedgemaze. Your choices have been reloaded.";
       }
 
     } else if (err.code === "ENOENT") { //new maze
+      if(args[0] === "abandon") {
+        removeFromMaze(sql, message.author.id);
+        return message.channel.send("", {embed: {
+          color: config.color,
+          description: "You are not in a hedgemaze. There is no hedgemaze for you to abandon"
+        }});
+      }
       let size = (args.length == 0 || isNaN(parseInt(args[0]))) ? 5 : parseInt(args[0]);
       if(size < 2 || size > 10) {
         message.reply("size must be between 2 and 10");
@@ -83,7 +92,7 @@ exports.run = async (client, message, command, config, sql, shortcut, keywordDat
           message.channel.send("```" + output + "```");
         }
       }
-
+      addToMaze(sql, message.author.id);
       description = "You enter a hedgemaze. Find the exit to escape.";
 
     } else { //other error
@@ -127,6 +136,7 @@ exports.runKeyword = async (client, message, command, config, sql, keywordData) 
             if (err) return console.error(err);
           });
         });
+        removeFromMaze(sql, message.author.id);
         description = "Hooray! You escaped the maze!";
         return message.channel.send("", {embed: {
           color: config.color,
@@ -157,6 +167,10 @@ exports.runKeyword = async (client, message, command, config, sql, keywordData) 
     });
     reportStatus(message, command, config, maze, description);
   });
+};
+
+exports.reloadOnRestart = async (client, config, sql, shortcut, keywordData) => {
+
 };
 
 async function reportStatus (message, command, config, maze, prefix, extrainfo) {
@@ -451,4 +465,44 @@ function printout(maze) {
     }
   }
   return output.join("\n");
+}
+
+async function removeFromMaze(sql, userID) {
+  try {
+    let row = await sql.get(`SELECT * FROM hedgemaze WHERE userID ="${userID}"`);
+    if(row) {
+      if(row.inMaze != 0) {
+        await sql.run("UPDATE hedgemaze SET inMaze = ? WHERE userID = ?", [0, userID]);
+      }
+    } else {
+      await sql.run("INSERT INTO hedgemaze (userID, inMaze) VALUES (?, ?)", [userID, 0]);
+    }
+  } catch(e) {
+    console.error(e);
+    if(e.message.startsWith("SQLITE_ERROR: no such table:")) {
+      console.log("Creating table hedgemaze");
+      await sql.run("CREATE TABLE IF NOT EXISTS hedgemaze (userID TEXT, inMaze INTEGER)");
+      await sql.run("INSERT INTO hedgemaze (userID, inMaze) VALUES (?, ?)", [userID, 0]);
+    }
+  }
+}
+
+async function addToMaze(sql, userID) {
+  try {
+    let row = await sql.get(`SELECT * FROM hedgemaze WHERE userID ="${userID}"`);
+    if(row) {
+      if(row.inMaze != 1) {
+        await sql.run("UPDATE hedgemaze SET inMaze = ? WHERE userID = ?", [1, userID]);
+      }
+    } else {
+      await sql.run("INSERT INTO hedgemaze (userID, inMaze) VALUES (?, ?)", [userID, 1]);
+    }
+  } catch(e) {
+    console.error(e);
+    if(e.message.startsWith("SQLITE_ERROR: no such table:")) {
+      console.log("Creating table hedgemaze");
+      await sql.run("CREATE TABLE IF NOT EXISTS hedgemaze (userID TEXT, inMaze INTEGER)");
+      await sql.run("INSERT INTO hedgemaze (userID, inMaze) VALUES (?, ?)", [userID, 1]);
+    }
+  }
 }
