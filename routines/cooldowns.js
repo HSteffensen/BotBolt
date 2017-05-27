@@ -46,9 +46,11 @@ exports.updateCooldown = async (client, message, command, config, sql, data) => 
     }
   } catch(e) {
     console.error(e);
-    console.log("Creating table cooldownTimers");
-    await sql.run("CREATE TABLE IF NOT EXISTS cooldownTimers (userIDcommandName TEXT, userID TEXT, commandName TEXT, startTime INTEGER, downtime INTEGER)");
-    await sql.run("INSERT INTO cooldownTimers (userIDcommandName, userID, commandName, startTime, downtime) VALUES (?, ?, ?, ?, ?)", [authorID + commandName, authorID, commandName, timestamp, downtime]);
+    if(e.message.startsWith("SQLITE_ERROR: no such table:")) {
+      console.log("Creating table cooldownTimers");
+      await sql.run("CREATE TABLE IF NOT EXISTS cooldownTimers (userIDcommandName TEXT, userID TEXT, commandName TEXT, startTime INTEGER, downtime INTEGER)");
+      await sql.run("INSERT INTO cooldownTimers (userIDcommandName, userID, commandName, startTime, downtime) VALUES (?, ?, ?, ?, ?)", [authorID + commandName, authorID, commandName, timestamp, downtime]);
+    }
   }
 };
 
@@ -112,10 +114,12 @@ async function refreshCooldownCache(sql, data) {
     }
   } catch(e) {
     console.error(e);
-    console.log("Creating table cooldownTimers");
-    await sql.run("CREATE TABLE IF NOT EXISTS cooldownTimers (userIDcommandName TEXT, userID TEXT, commandName TEXT, startTime INTEGER, downtime INTEGER)");
-    console.log("Creating table cooldowns");
-    await sql.run("CREATE TABLE IF NOT EXISTS cooldowns (commandName TEXT, downtime INTEGER, verbosity INTEGER, punishment INTEGER)");
+    if(e.message.startsWith("SQLITE_ERROR: no such table:")) {
+      console.log("Creating table cooldownTimers");
+      await sql.run("CREATE TABLE IF NOT EXISTS cooldownTimers (userIDcommandName TEXT, userID TEXT, commandName TEXT, startTime INTEGER, downtime INTEGER)");
+      console.log("Creating table cooldowns");
+      await sql.run("CREATE TABLE IF NOT EXISTS cooldowns (commandName TEXT, downtime INTEGER, verbosity INTEGER, punishment INTEGER)");
+    }
   }
 }
 

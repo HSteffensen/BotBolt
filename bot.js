@@ -136,7 +136,9 @@ async function unpackAlias(aliasName) {
     }
   } catch(e) {
     console.error(e);
-    console.log("Creating table alias");
-    await sql.run("CREATE TABLE IF NOT EXISTS alias (name TEXT, commands TEXT)");
+    if(e.message.startsWith("SQLITE_ERROR: no such table:")) {
+      console.log("Creating table alias");
+      await sql.run("CREATE TABLE IF NOT EXISTS alias (name TEXT, commands TEXT)");
+    }
   }
 }
