@@ -37,6 +37,10 @@ exports.run = async (client, message, command, config, sql) => {
   return await checkMoneydrop(client, message, command, config, sql, channels);
 };
 
+exports.removeDeletedChannel = (client, sql, channel) => {
+  removeChannel(sql, channel);
+};
+
 async function checkMoneydrop(client, message, command, config, sql, channels) {
   let description = "";
   for(let i = 0, len = channels.length; i < len; i++) {
@@ -199,19 +203,7 @@ async function clearMoneydrop(client, message, command, config, sql, channels) {
   let description = "";
   for(let i = 0, len = channels.length; i < len; i++) {
     let channel = channels[i];
-    let channelID = channel.id;
-    try {
-      let row = await sql.get(`SELECT * FROM moneydrop WHERE channelID ="${channelID}"`);
-      if(row) {
-        await sql.run(`DELETE FROM moneydrop WHERE channelID = ${channelID}`);
-      }
-    } catch(e) {
-      console.error(e);
-      if(e.message.startsWith("SQLITE_ERROR: no such table:")) {
-        console.log("Creating table moneydrop");
-        await sql.run("CREATE TABLE IF NOT EXISTS moneydrop (channelID TEXT, dropMoney INTEGER, pileSize INTEGER, verbosity INTEGER, firstMin INTEGER, firstMax INTEGER, firstProbability FLOAT, secondMin INTEGER, secondMax INTEGER, secondProbability FLOAT, thirdMin INTEGER, thirdMax INTEGER, thirdProbability FLOAT)");
-      }
-    }
+    removeChannel(channel);
     description += `Moneydrop configuration **cleared**, money pile **deleted**, and drop **disabled** in ${channel}.\n`;
   }
 
@@ -220,4 +212,20 @@ async function clearMoneydrop(client, message, command, config, sql, channels) {
     color: config.color,
     description: description
   }});
+}
+
+async function removeChannel(sql, channel) {
+  let channelID = channel.id;
+  try {
+    let row = await sql.get(`SELECT * FROM moneydrop WHERE channelID ="${channelID}"`);
+    if(row) {
+      await sql.run(`DELETE FROM moneydrop WHERE channelID = ${channelID}`);
+    }
+  } catch(e) {
+    console.error(e);
+    if(e.message.startsWith("SQLITE_ERROR: no such table:")) {
+      console.log("Creating table moneydrop");
+      await sql.run("CREATE TABLE IF NOT EXISTS moneydrop (channelID TEXT, dropMoney INTEGER, pileSize INTEGER, verbosity INTEGER, firstMin INTEGER, firstMax INTEGER, firstProbability FLOAT, secondMin INTEGER, secondMax INTEGER, secondProbability FLOAT, thirdMin INTEGER, thirdMax INTEGER, thirdProbability FLOAT)");
+    }
+  }
 }

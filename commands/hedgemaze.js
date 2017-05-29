@@ -12,7 +12,7 @@ exports.run = async (client, message, command, config, sql, shortcut, keywordDat
 
   fs.stat(mazeFilename, async (err) => {
     if(err === null) { //already in a maze
-      if(args[0] === "abandon") {
+      if(args[0] === "abandon" || args[0] === "quit") {
         fs.unlink(mazeFilename, (err) => {
           if (err) return console.error(err);
         });
@@ -35,11 +35,11 @@ exports.run = async (client, message, command, config, sql, shortcut, keywordDat
       }
 
     } else if (err.code === "ENOENT") { //new maze
-      if(args[0] === "abandon") {
+      if(args[0] === "abandon" || args[0] === "quit") {
         removeFromMaze(sql, message.author.id);
         return message.channel.send("", {embed: {
           color: config.color,
-          description: "You are not in a hedgemaze. There is no hedgemaze for you to abandon"
+          description: "You are not in a hedgemaze. There is no hedgemaze for you to abandon."
         }});
       }
       let size = (args.length == 0 || isNaN(parseInt(args[0]))) ? 5 : parseInt(args[0]);
@@ -170,7 +170,22 @@ exports.runKeyword = async (client, message, command, config, sql, keywordData) 
 };
 
 exports.reloadOnRestart = async (client, config, sql, shortcut, keywordData) => {
-
+  let fs = require("fs");
+  let users = await getMazeUsers(sql);
+  for(let i = 0; i < users.length; i++) {
+    let userInfo = users[i];
+    if(userInfo.inMaze) {
+      let mazeFilename = `data/dataMaze_${userInfo.userID}.json`;
+      let maze = JSON.parse(fs.readFileSync(mazeFilename, "utf8"));
+      let choices = getChoices(maze);
+      for(let i = 0; i < choices.length; i++) {
+        let choice = choices[i];
+        keywordData[choice + userInfo.userID] = {
+          command: "hedgemaze"
+        };
+      }
+    }
+  }
 };
 
 async function reportStatus (message, command, config, maze, prefix, extrainfo) {
@@ -503,6 +518,23 @@ async function addToMaze(sql, userID) {
       console.log("Creating table hedgemaze");
       await sql.run("CREATE TABLE IF NOT EXISTS hedgemaze (userID TEXT, inMaze INTEGER)");
       await sql.run("INSERT INTO hedgemaze (userID, inMaze) VALUES (?, ?)", [userID, 1]);
+    }
+  }
+}
+
+async function getMazeUsers(sql) {
+  try {
+    let rows = await sql.all("SELECT * FROM hedgemaze");
+    if(rows) {
+      return rows;
+    } else {
+      return [];
+    }
+  } catch(e) {
+    console.error(e);
+    if(e.message.startsWith("SQLITE_ERROR: no such table:")) {
+      console.log("Creating table hedgemaze");
+      await sql.run("CREATE TABLE IF NOT EXISTS hedgemaze (userID TEXT, inMaze INTEGER)");
     }
   }
 }

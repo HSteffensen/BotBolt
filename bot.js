@@ -21,6 +21,8 @@ client.login(config.token);
 
 client.on("ready", () => {
   console.log("I am ready!");
+  let hedgemazeFile = require("./commands/hedgemaze.js");
+  hedgemazeFile.reloadOnRestart(client, config, sql, shortcut, keywordData);
 });
 
 client.on("message", async (message) => {
@@ -52,6 +54,11 @@ client.on("message", async (message) => {
   }
   let moneypileFile = require("./routines/moneypile.js");
   await moneypileFile.run(client, message, config, sql, moneypileCache);
+});
+
+client.on("channelDelete", async (channel) => {
+  let moneydropFile = require("./commands/moneydrop.js");
+  moneydropFile.removeDeletedChannel(client, sql, channel);
 });
 
 async function runCommand(command, message) {
