@@ -1,4 +1,4 @@
-exports.run = async (client, message, command, config, sql) => {
+exports.run = async (client, message, command, config, sql, shortcut, cacheData) => {
   let author = message.author;
   let authorID = author.id;
   let channel = message.channel;
@@ -6,25 +6,34 @@ exports.run = async (client, message, command, config, sql) => {
 
   if(channel.permissionsFor(client.user).has("MANAGE_MESSAGES")) {
     try {
-      await message.delete();
+      message.delete();
     } catch(e) {
       console.error(e);
     }
   }
 
-  let grabbed = 0;
-  let remaining = 0;
+  let data = cacheData.moneypileCache;
+  let channelData = (data.list.hasOwnProperty(message.channel.id)) ? data.list[channelID] : null;
+  if(channelData == null || channelData.pileSize == 0) {
+    return;
+  }
+
+  let grabbed = Math.ceil((Math.random() * 0.45 + 0.5) * channelData.pileSize);
+  let remaining = channelData.pileSize - grabbed;
+  channelData.pileSize = remaining;
   let balance = 0;
   let total = 0;
-  let verbosity = 0;
+  let verbosity = channelData.verbosity;
 
+  //this section is from back before the moneypileCache was used instead of direct sqlite calls
+  /*
   try {
     let row = await sql.get(`SELECT * FROM moneydrop WHERE channelID ="${channelID}"`);
     if(!row) {
       await sql.run("INSERT INTO moneydrop (channelID, dropMoney, pileSize, verbosity, firstMin, firstMax, firstProbability, secondMin, secondMax, secondProbability, thirdMin, thirdMax, thirdProbability) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
        [channelID, 0, 0, 0, 0, 20, 0.02, 20, 50, 0.005, 100, 300, 0.001]); //default amounts and probabilities
     } else {
-      grabbed = Math.ceil((Math.random() / 2 + 0.5) * row.pileSize);
+      grabbed = Math.ceil((Math.random() * 0.45 + 0.5) * row.pileSize);
       remaining = row.pileSize - grabbed;
       verbosity = row.verbosity;
       await sql.run(`UPDATE moneydrop SET pileSize = ${remaining} WHERE channelID = ${channelID}`);
@@ -38,6 +47,7 @@ exports.run = async (client, message, command, config, sql) => {
        [channelID, 0, 0, 0, 0, 20, 0.02, 20, 50, 0.005, 100, 300, 0.001]); //default amounts and probabilities
     }
   }
+  */
 
   try {
     let row = await sql.get(`SELECT * FROM money WHERE userID ="${authorID}"`);

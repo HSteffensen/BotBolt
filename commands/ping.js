@@ -1,3 +1,3 @@
 exports.run = (client, message) => {
-  message.channel.send("Pong!").catch(console.error);
+  message.channel.send(":ping_pong: Pong!").catch(console.error);
 };

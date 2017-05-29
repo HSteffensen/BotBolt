@@ -1,4 +1,5 @@
-exports.run = async (client, message, command, config, sql, shortcut, keywordData) => {
+exports.run = async (client, message, command, config, sql, shortcut, cacheData) => {
+  let keywordData = cacheData.keywordData;
   let fs = require("fs");
   let args = command.args;
   let mazeFilename = `data/dataMaze_${message.author.id}.json`;
@@ -93,7 +94,7 @@ exports.run = async (client, message, command, config, sql, shortcut, keywordDat
         }
       }
       addToMaze(sql, message.author.id);
-      description = "You enter a hedgemaze. Find the exit to escape.";
+      description = "You enter a hedgemaze. Find the exit to escape.\nYou can explore this hedgemaze in DMs with the bot to reduce spam.";
 
     } else { //other error
       console.log(err);
@@ -109,7 +110,8 @@ exports.run = async (client, message, command, config, sql, shortcut, keywordDat
   });
 };
 
-exports.runKeyword = async (client, message, command, config, sql, keywordData) => {
+exports.runKeyword = async (client, message, command, config, sql, cacheData) => {
+  let keywordData = cacheData.keywordData;
   if(command.args.length > 0) {
     return; //want the keyword to be alone
   }
@@ -169,7 +171,8 @@ exports.runKeyword = async (client, message, command, config, sql, keywordData) 
   });
 };
 
-exports.reloadOnRestart = async (client, config, sql, shortcut, keywordData) => {
+exports.reloadOnRestart = async (client, config, sql, shortcut, cacheData) => {
+  let keywordData = cacheData.keywordData;
   let fs = require("fs");
   let users = await getMazeUsers(sql);
   for(let i = 0; i < users.length; i++) {

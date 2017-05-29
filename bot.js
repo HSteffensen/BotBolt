@@ -16,13 +16,18 @@ let cooldownCache = {
 let keywordData = {
 
 };
+let cacheData = {
+  moneypileCache: moneypileCache,
+  cooldownCache: cooldownCache,
+  keywordData: keywordData
+};
 
 client.login(config.token);
 
 client.on("ready", () => {
   console.log("I am ready!");
   let hedgemazeFile = require("./commands/hedgemaze.js");
-  hedgemazeFile.reloadOnRestart(client, config, sql, shortcut, keywordData);
+  hedgemazeFile.reloadOnRestart(client, config, sql, shortcut, cacheData);
 });
 
 client.on("message", async (message) => {
@@ -62,8 +67,11 @@ client.on("channelDelete", async (channel) => {
 });
 
 async function runCommand(command, message) {
-  if(command.name === "moneydrop" || command.name === "moneygrab") {
+  if(command.name === "moneydrop") {
     moneypileCache.refresh = true;
+  }
+  if(command.name === "moneygrab" && moneypileCache.list.hasOwnProperty(message.channel.id)) {
+    moneypileCache.list[message.channel.id].grabbed = true;
   }
   if(command.name === "cooldown") {
     cooldownCache.refresh = true;
@@ -76,7 +84,7 @@ async function runCommand(command, message) {
       if(cooldownOK) {
         try {
           let commandFile = require(`./commands/${command.name}.js`);
-          await commandFile.run(client, message, command, config, sql, shortcut, keywordData);
+          await commandFile.run(client, message, command, config, sql, shortcut, cacheData);
         } catch (err) {
           if(err.code !== "MODULE_NOT_FOUND") { //otherwise a module not found error would be logged for every !blahblahblah that isnt a command
             console.log(err);
@@ -95,7 +103,7 @@ async function runCommand(command, message) {
 async function runKeyword(command, message) {
   let kw = keywordData[command.name + message.author.id];
   let commandFile = require(`./commands/${kw.command}.js`);
-  await commandFile.runKeyword(client, message, command, config, sql, keywordData);
+  await commandFile.runKeyword(client, message, command, config, sql, cacheData);
 }
 
 function parseForCommands(message, authorID) {

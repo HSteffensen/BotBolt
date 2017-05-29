@@ -1,16 +1,13 @@
 exports.run = async (client, message, config, sql, data) => {
   if(data.refresh) {
+    return await refreshMoneypileCache(sql, data); //should be run every time !moneydrop is called ever.
+  }
+  if(data.list[message.channel.id].grabbed) {
     //returns because !moneydrop and !grab should not generate money.
-    return await refreshMoneypileCache(sql, data); //should be run every time !moneydrop or !moneygrab is called ever.
+    return await updateMoneypileSize(sql, data);
   }
 
-  let channelData = null;
-  for(let i = 0; i < data.list.length; i++) {
-    if(data.list[i].channelID == message.channel.id) {
-      channelData = data.list[i];
-      break;
-    }
-  }
+  let channelData = (data.list.hasOwnProperty(message.channel.id)) ? data.list[message.channel.id] : null;
   if(channelData == null || channelData.dropMoney == 0) {
     return;
   }
@@ -69,15 +66,42 @@ exports.run = async (client, message, config, sql, data) => {
 
 async function refreshMoneypileCache(sql, data) {
   data.refresh = false;
-  data.list = [];
+  data.list = {};
   try{
-    let row = await sql.all("SELECT * FROM moneydrop");
-    data.list = row;
+    let rows = await sql.all("SELECT * FROM moneydrop");
+    for(let i = 0; i < rows.length; i++) {
+      let channelID = rows[i].channelID;
+      data.list[channelID] = rows[i];
+      data.list[channelID].update = false;
+    }
   } catch(e) {
     console.error(e);
     if(e.message.startsWith("SQLITE_ERROR: no such table:")) {
       console.log("Creating table moneydrop");
       await sql.run("CREATE TABLE IF NOT EXISTS moneydrop (channelID TEXT, dropMoney INTEGER, pileSize INTEGER, verbosity INTEGER, firstMin INTEGER, firstMax INTEGER, firstProbability FLOAT, secondMin INTEGER, secondMax INTEGER, secondProbability FLOAT, thirdMin INTEGER, thirdMax INTEGER, thirdProbability FLOAT)");
+    }
+  }
+}
+
+async function updateMoneypileSize(sql, data) {
+  let channels = Object.keys(data.list);
+  for(let i = 0; i < channels.length; i++) {
+    let channelID = channels[i];
+    let channelData = data.list[channelID];
+    channelData.grabbed = false;
+    try{
+      let row = await sql.get("SELECT * FROM moneydrop WHERE channelID = ?", [channelID]);
+      if(row) {
+        await sql.run("UPDATE moneydrop SET pileSize = ? WHERE channelID = ?", [channelData.pileSize, channelData.channelID]);
+      } else {
+        console.error("Somehow botbolt/routines/moneypile.js:updateMoneypileSize() tried to update a moneypile in an SQLite row that doesn't exist.");
+      }
+    } catch(e) {
+      console.error(e);
+      if(e.message.startsWith("SQLITE_ERROR: no such table:")) {
+        console.log("Creating table moneydrop");
+        await sql.run("CREATE TABLE IF NOT EXISTS moneydrop (channelID TEXT, dropMoney INTEGER, pileSize INTEGER, verbosity INTEGER, firstMin INTEGER, firstMax INTEGER, firstProbability FLOAT, secondMin INTEGER, secondMax INTEGER, secondProbability FLOAT, thirdMin INTEGER, thirdMax INTEGER, thirdProbability FLOAT)");
+      }
     }
   }
 }
