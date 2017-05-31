@@ -19,6 +19,8 @@ exports.run = async (client, message, command, config, sql) => {
   let values = {
     "enable": 1,
     "disable": 0,
+    "enabled": 1,
+    "disabled": 0,
     "on": 1,
     "off": 0
   };
@@ -38,7 +40,7 @@ exports.run = async (client, message, command, config, sql) => {
 };
 
 exports.removeDeletedChannel = (client, sql, channel) => {
-  removeChannel(sql, channel);
+  removeChannel(sql, channel.id);
 };
 
 async function checkMoneydrop(client, message, command, config, sql, channels) {
@@ -203,7 +205,7 @@ async function clearMoneydrop(client, message, command, config, sql, channels) {
   let description = "";
   for(let i = 0, len = channels.length; i < len; i++) {
     let channel = channels[i];
-    removeChannel(channel);
+    removeChannel(sql, channel.id);
     description += `Moneydrop configuration **cleared**, money pile **deleted**, and drop **disabled** in ${channel}.\n`;
   }
 
@@ -214,8 +216,7 @@ async function clearMoneydrop(client, message, command, config, sql, channels) {
   }});
 }
 
-async function removeChannel(sql, channel) {
-  let channelID = channel.id;
+async function removeChannel(sql, channelID) {
   try {
     let row = await sql.get(`SELECT * FROM moneydrop WHERE channelID ="${channelID}"`);
     if(row) {

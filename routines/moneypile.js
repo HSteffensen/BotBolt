@@ -2,13 +2,15 @@ exports.run = async (client, message, config, sql, data) => {
   if(data.refresh) {
     return await refreshMoneypileCache(sql, data); //should be run every time !moneydrop is called ever.
   }
+  let channelData = (data.list.hasOwnProperty(message.channel.id)) ? data.list[message.channel.id] : null;
+  if(channelData == null) {
+    return;
+  }
   if(data.list[message.channel.id].grabbed) {
-    //returns because !moneydrop and !grab should not generate money.
+    //returns because !moneydrop and !moneygrab should not generate money.
     return await updateMoneypileSize(sql, data);
   }
-
-  let channelData = (data.list.hasOwnProperty(message.channel.id)) ? data.list[message.channel.id] : null;
-  if(channelData == null || channelData.dropMoney == 0) {
+  if(channelData.dropMoney == 0) {
     return;
   }
 

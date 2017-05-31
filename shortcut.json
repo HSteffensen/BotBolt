@@ -15,5 +15,6 @@
   "repeat": "echo",
   "sleep": "wait",
   "pause": "wait",
-  "maze": "hedgemaze"
+  "maze": "hedgemaze",
+  "sky": "skyscraper"
 }

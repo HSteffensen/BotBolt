@@ -28,6 +28,8 @@ client.on("ready", () => {
   console.log("I am ready!");
   let hedgemazeFile = require("./commands/hedgemaze.js");
   hedgemazeFile.reloadOnRestart(client, config, sql, shortcut, cacheData);
+  let skyscrapersFile = require("./routines/skyscrapers.js");
+  skyscrapersFile.run(client, config, sql);
 });
 
 client.on("message", async (message) => {
