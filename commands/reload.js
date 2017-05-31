@@ -2,7 +2,6 @@ exports.run = (client, message, command, config, sql, shortcut) => {
   let args = command.args;
   // Caller must be bot owner
   let permitted = false;
-  //let authorID = message.author.id.toString();
   for(let i = 0, len = config.ownerIDs.length; i < len; i++) {
     let owner = config.ownerIDs[i];
     if(owner == message.author.id) {

@@ -24,7 +24,7 @@ exports.run = async (client, config, sql) => {
         let newStrike = 0;
         if(row.strike > 0) {
           newStrike = row.strike - 1;
-          built = 0;
+          built = built / 2;
         }
         let newProgress = row.progress + built;
         let newHeight = row.height;

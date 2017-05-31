@@ -14,6 +14,10 @@ exports.run = async (client, message, command, config, sql) => {
     return message.reply("Permission denied: moneydrop");
   }
 
+  if(message.channel.type === "dm") {
+    return message.reply("Bad request: can't drop money in a DM.");
+  }
+
   let channels = (message.mentions.channels.array().length > 0) ? message.mentions.channels.array() : [message.channel];
 
   let values = {
@@ -155,7 +159,7 @@ async function setProperty(client, message, command, config, sql, channels) {
     };
     input = (verbosityMap[input]) ? verbosityMap[input] : input;
   } else {
-    return message.reply("!moneydrop set options: `verbosity , firstMin, firstMax, firstProbability, secondMin, secondMax, secondProbability, thirdMin, thirdMax, thirdProbability`");
+    return message.reply("!moneydrop set options: `verbosity, pileSize, firstMin, firstMax, firstProbability, secondMin, secondMax, secondProbability, thirdMin, thirdMax, thirdProbability`");
   }
 
   let description = "";
