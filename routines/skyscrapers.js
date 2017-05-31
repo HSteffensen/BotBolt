@@ -20,14 +20,18 @@ exports.run = async (client, config, sql) => {
           }
         }
         let built = Math.sqrt(row.workers) / 100;
+        let newStrike = 0;
+        if(row.strike > 0) {
+          newStrike = row.strike - 1;
+          built = 0;
+        }
         let newProgress = row.progress + built;
         let newHeight = row.height;
-        console.log(`${targetID}: ${built}, ${newProgress}, ${newHeight}`);
         if(newProgress >= 1) {
           newHeight += 1;
           newProgress -= 1;
         }
-        await sql.run("UPDATE skyscraper SET height = ?, progress = ? WHERE userID = ?", [newHeight, newProgress, targetID]);
+        await sql.run("UPDATE skyscraper SET height = ?, progress = ?, strike = ? WHERE userID = ?", [newHeight, newProgress, newStrike, targetID]);
       }
       if(!foundSelf) {
         await sql.run("INSERT INTO skyscraper (userID, workers, height, progress, strike) VALUES (?, ?, ?, ?, ?)", [client.user.id, 1, 0, 0.0, 0]);

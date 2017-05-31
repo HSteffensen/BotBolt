@@ -74,7 +74,8 @@ async function checkSkyscraper(user, sql, verbose) {
   try {
     let row = await sql.get(`SELECT * FROM skyscraper WHERE userID ="${userID}"`);
     if(row) {
-      output += `**${user.tag}** has ${row.workers} workers and ${row.height} floors.\n`;
+      let s = (row.workers != 1) ? "s" : "";
+      output += `**${user.tag}** has ${row.workers} worker${s} and ${row.height} floors.\n`;
       output += `The highest floor is ${(100 * row.progress).toFixed(precision)}% completed.\n`;
       if(row.strike > 0) {
         output += `Your workers are on strike for ${row.strike} more hours.`;
