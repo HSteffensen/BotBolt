@@ -16,6 +16,13 @@ exports.run = async (client, message, command, config, sql) => {
     } else {
       description = "Give a number of workers to hire: \`!skyscraper hire 1\`\nEach worker costs \$1 more than the last.";
     }
+  } else if(args[0] === "leaderboard" || args[0] === "lb") {
+    let page = (args.length > 1) ? parseInt(args[1]) : 1;
+    if(!isNaN(page) && page >= 1) {
+      description = await getLeaderboard(message, sql, page, command.verbose);
+    } else {
+      description = "Give a page number or leave blank for page 1: \`!skyscraper leaderboard 1\`";
+    }
   } else if(args[0] === "earthquake") {
     let magnitude = parseInt(args[1]);
     if(!isNaN(magnitude) && magnitude >= 1) {
@@ -76,13 +83,13 @@ async function checkSkyscraper(user, sql, verbose) {
     if(row) {
       let s = (row.workers != 1) ? "s" : "";
       output += `**${user.tag}** has ${row.workers} worker${s} and ${row.height} floors.\n`;
-      output += `The highest floor is ${(100 * row.progress).toFixed(precision)}% completed.\n`;
+      output += `The next floor is ${(100 * row.progress).toFixed(precision)}% completed.\n`;
       if(row.strike > 0) {
         output += `Your workers are on strike for ${row.strike} more hours.`;
       }
     } else {
       await sql.run("INSERT INTO skyscraper (userID, workers, height, progress, strike) VALUES (?, ?, ?, ?, ?)", [userID, 0, 0, 0.0, 0]);
-      output = `0 workers and 0 floors.\nThe highest floor is ${(0.0).toFixed(precision)}% completed.`;
+      output = `0 workers and 0 floors.\nThe next floor is ${(0.0).toFixed(precision)}% completed.`;
     }
   } catch(e) {
     console.error(e);
@@ -90,8 +97,45 @@ async function checkSkyscraper(user, sql, verbose) {
       console.log("Creating table skyscraper");
       await sql.run("CREATE TABLE IF NOT EXISTS skyscraper (userID TEXT, workers INTEGER, height INTEGER, progress FLOAT, strike INTEGER)");
       await sql.run("INSERT INTO skyscraper (userID, workers, height, progress, strike) VALUES (?, ?, ?, ?, ?)", [userID, 0, 0, 0.0, 0]);
-      output = `0 workers and 0 floors.\nThe highest floor is ${(0.0).toFixed(precision)}% completed.`;
+      output = `0 workers and 0 floors.\nThe next floor is ${(0.0).toFixed(precision)}% completed.`;
     }
+  }
+  return output;
+}
+
+async function getLeaderboard(message, sql, page, verbose) {
+  let rows = [];
+  try {
+    rows = await sql.all("SELECT * FROM skyscraper");
+  } catch(e) {
+    console.error(e);
+    if(e.message.startsWith("SQLITE_ERROR: no such table:")) {
+      console.log("Creating table skyscraper");
+      await sql.run("CREATE TABLE IF NOT EXISTS skyscraper (userID TEXT, workers INTEGER, height INTEGER, progress FLOAT, strike INTEGER)");
+      await sql.run("INSERT INTO skyscraper (userID, workers, height, progress, strike) VALUES (?, ?, ?, ?, ?)", [message.author.id, 0, 0, 0.0, 0]);
+      rows = [{userID: message.author.id, workers: 0, height: 0, progress: 0, strike: 0}];
+    }
+  }
+  rows.sort((a, b) => {
+    let aValue = a.height + a.progress;
+    let bValue = b.height + b.progress;
+    return bValue - aValue;
+  });
+  let start = (page - 1) * 10;
+  if(rows.length < start) {
+    page = Math.floor(rows.length / 10) + 1;
+    start = (page - 1) * 10;
+  }
+  let output = "";
+  let precision = (verbose) ? 6 : 3;
+  if(page > 1) {
+    output = `Page ${page}:\n`;
+  }
+  for(let i = start; i < start + 10 && i < rows.length; i++) {
+    let row = rows[i];
+    output += `**#${i+1}: <@${row.userID}>**\n`;
+    output += `${row.height} floors. Next floor is ${(100 * row.progress).toFixed(precision)}% completed. ${row.workers} workers.\n`;
+    output += "\n";
   }
   return output;
 }

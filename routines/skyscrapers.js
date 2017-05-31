@@ -1,9 +1,10 @@
 exports.run = async (client, config, sql) => {
   let running = true;
+  let hourFraction = 0.5;
   while(running) {
-    //sleep until next hour
-    let hourAway = (3600 * 1000) - Date.now() % (3600 * 1000);
-    //let hourAway = 60 * 1000; //only for testing
+    //sleep until next HALF hour
+    let hourAway = (3600 * 1000 * hourFraction) - Date.now() % (3600 * 1000 * hourFraction);
+    //let hourAway = 60 * 1000; //one minute for testing
     await sleep(hourAway);
 
     try {
@@ -19,7 +20,7 @@ exports.run = async (client, config, sql) => {
             row.workers = 1;
           }
         }
-        let built = Math.sqrt(row.workers) / 100;
+        let built = Math.sqrt(row.workers) / 100 * hourFraction;
         let newStrike = 0;
         if(row.strike > 0) {
           newStrike = row.strike - 1;
