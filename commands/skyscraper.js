@@ -19,7 +19,7 @@ exports.run = async (client, message, command, config, sql) => {
   } else if(args[0] === "leaderboard" || args[0] === "lb") {
     let page = (args.length > 1) ? parseInt(args[1]) : 1;
     if(!isNaN(page) && page >= 1) {
-      description = await getLeaderboard(message, sql, page, command.verbose);
+      description = await getLeaderboard(client, message, sql, page, command.verbose);
     } else {
       description = "Give a page number or leave blank for page 1: \`!skyscraper leaderboard 1\`";
     }
@@ -103,7 +103,7 @@ async function checkSkyscraper(user, sql, verbose) {
   return output;
 }
 
-async function getLeaderboard(message, sql, page, verbose) {
+async function getLeaderboard(client, message, sql, page, verbose) {
   let rows = [];
   try {
     rows = await sql.all("SELECT * FROM skyscraper");
@@ -133,7 +133,8 @@ async function getLeaderboard(message, sql, page, verbose) {
   }
   for(let i = start; i < start + 10 && i < rows.length; i++) {
     let row = rows[i];
-    output += `**#${i+1}: <@${row.userID}>**\n`;
+    let user = await client.fetchUser(row.userID);
+    output += `**#${i+1}: ${user.tag}**\n`;
     output += `${row.height} floors. Next floor is ${(100 * row.progress).toFixed(precision)}% completed. ${row.workers} workers.\n`;
     output += "\n";
   }
