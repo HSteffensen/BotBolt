@@ -16,5 +16,6 @@
   "sleep": "wait",
   "pause": "wait",
   "maze": "hedgemaze",
-  "sky": "skyscraper"
+  "sky": "skyscraper",
+  "h": "help"
 }
