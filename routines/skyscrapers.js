@@ -20,7 +20,7 @@ exports.run = async (client, config, sql) => {
             row.workers = 1;
           }
         }
-        let built = Math.sqrt(row.workers) / 100 * hourFraction;
+        let built = Math.sqrt(row.workers) / 100 * hourFraction * 2;
         let newStrike = 0;
         if(row.strike > 0) {
           newStrike = row.strike - 1;
