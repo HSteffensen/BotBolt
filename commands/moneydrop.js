@@ -59,6 +59,7 @@ async function checkMoneydrop(client, message, command, config, sql, channels) {
          [channelID, 0, 0, 0, 0, 20, 0.02, 20, 50, 0.005, 100, 300, 0.001]); //default amounts and probabilities
         description += `${channel}\n`;
         description += `Enabled: ${false}. Verbosity: None.\n`;
+        description += `Pile: \$${0}.\n`;
         description += `Drop: ${0} to ${20}, ${0.02} chance.\n`;
         description += `Drop: ${20} to ${50}, ${0.005} chance.\n`;
         description += `Drop: ${100} to ${300}, ${0.001} chance.\n`;
@@ -70,6 +71,7 @@ async function checkMoneydrop(client, message, command, config, sql, channels) {
         };
         description += `${channel}\n`;
         description += `Enabled: ${(row.dropMoney == 1)}. Verbosity: ${verbosityOutput[row.verbosity]}\n`;
+        description += `Pile: \$${row.pileSize}.\n`;
         description += `Drop: ${row.firstMin} to ${row.firstMax}, ${row.firstProbability} chance.\n`;
         description += `Drop: ${row.secondMin} to ${row.secondMax}, ${row.secondProbability} chance.\n`;
         description += `Drop: ${row.thirdMin} to ${row.thirdMax}, ${row.thirdProbability} chance.\n`;
@@ -84,6 +86,7 @@ async function checkMoneydrop(client, message, command, config, sql, channels) {
       }
       description += `${channel}\n`;
       description += `Enabled: ${false}. Verbosity: None.\n`;
+      description += `Pile: \$${0}.\n`;
       description += `Drop: ${0} to ${20}, ${0.02} chance.\n`;
       description += `Drop: ${20} to ${50}, ${0.005} chance.\n`;
       description += `Drop: ${100} to ${300}, ${0.001} chance.\n`;
