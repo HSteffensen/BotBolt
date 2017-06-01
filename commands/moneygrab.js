@@ -4,14 +4,6 @@ exports.run = async (client, message, command, config, sql, shortcut, cacheData)
   let channel = message.channel;
   let channelID = channel.id;
 
-  if(channel.permissionsFor(client.user).has("MANAGE_MESSAGES")) {
-    try {
-      message.delete();
-    } catch(e) {
-      console.error(e);
-    }
-  }
-
   let data = cacheData.moneypileCache;
   let channelData = (data.list.hasOwnProperty(message.channel.id)) ? data.list[channelID] : null;
   if(channelData == null || channelData.pileSize == 0) {

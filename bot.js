@@ -5,6 +5,9 @@ sql.open("./data/database.sqlite");
 const config = require("./config.json");
 const shortcut = require("./shortcut.json");
 
+let deleteInstantly = {
+  moneygrab: true
+};
 let cacheData = {
   moneypileCache: {
     refresh: true,
@@ -68,6 +71,15 @@ client.on("channelDelete", async (channel) => {
 });
 
 async function runCommand(command, message) {
+  if(deleteInstantly[command.name]) {
+    if(message.channel.permissionsFor(client.user).has("MANAGE_MESSAGES")) {
+      try {
+        message.delete();
+      } catch(e) {
+        console.error(e);
+      }
+    }
+  }
   if(command.name === "moneydrop") {
     cacheData.moneypileCache.refresh = true;
   }
@@ -116,17 +128,18 @@ function parseForCommands(message, authorID) {
     line = line.trim();
     let command = {};
     let lineSplit = line.split(" ");
+    let firstWord = lineSplit[0].toLowerCase();
     if(line.startsWith(config.commandPrefix)) {
       command.type = "command";
-      let commandWord = lineSplit[0].slice(config.commandPrefix.length);
+      let commandWord = firstWord.slice(config.commandPrefix.length);
       command.name = (shortcut[commandWord]) ? shortcut[commandWord] : commandWord;
       command.shortcut = commandWord;
     } else if(line.startsWith(config.aliasPrefix)) {
       command.type = "alias";
-      command.name = lineSplit[0].slice(config.aliasPrefix.length);
-    } else if(cacheData.keywordData.hasOwnProperty(lineSplit[0] + authorID) || cacheData.keywordData.hasOwnProperty(lineSplit[0] + "0")) {
+      command.name = firstWord.slice(config.aliasPrefix.length);
+    } else if(cacheData.keywordData.hasOwnProperty(firstWord + authorID) || cacheData.keywordData.hasOwnProperty(firstWord + "0")) {
       command.type = "keyword";
-      command.name = lineSplit[0];
+      command.name = firstWord;
     }
     command.silent = false;
     command.verbose = false;
