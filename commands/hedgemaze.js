@@ -51,8 +51,8 @@ exports.run = async (client, message, command, config, sql, shortcut, cacheData)
       let monsters = 0;
       let monsterIntelligence = 0;
       let reward = 0;
-      let print = true;
-      let verbosity = 0; //0 or 1, maybe 2 once i get to it?
+      let print = false;
+      let verbosity = 1; //0 or 1, maybe 2 once i get to it?
       maze = {
         size: size,
         verbosity: verbosity,
