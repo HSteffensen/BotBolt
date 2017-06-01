@@ -14,11 +14,11 @@ exports.run = async (client, message, command, config, sql) => {
     return message.reply("Permission denied: moneydrop");
   }
 
-  if(message.channel.type === "dm") {
+  let channels = (message.mentions.channels.array().length > 0) ? message.mentions.channels.array() : [message.channel];
+
+  if(channels[0].type === "dm") {
     return message.reply("Bad request: can't drop money in a DM.");
   }
-
-  let channels = (message.mentions.channels.array().length > 0) ? message.mentions.channels.array() : [message.channel];
 
   let values = {
     "enable": 1,

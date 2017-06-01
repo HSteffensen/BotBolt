@@ -4,22 +4,19 @@ const sql = require("sqlite");
 sql.open("./data/database.sqlite");
 const config = require("./config.json");
 const shortcut = require("./shortcut.json");
-let moneypileCache = {
-  refresh: true,
-  list: []
-};
-let cooldownCache = {
-  refresh: true,
-  commands: {},
-  timers: {}
-};
-let keywordData = {
 
-};
 let cacheData = {
-  moneypileCache: moneypileCache,
-  cooldownCache: cooldownCache,
-  keywordData: keywordData
+  moneypileCache: {
+    refresh: true,
+    list: {}
+  },
+  cooldownCache: {
+    refresh: true,
+    commands: {},
+    timers: {}
+  },
+  restrictionCache: {},
+  keywordData: {}
 };
 
 client.login(config.token);
@@ -28,6 +25,8 @@ client.on("ready", () => {
   console.log("I am ready!");
   let hedgemazeFile = require("./commands/hedgemaze.js");
   hedgemazeFile.reloadOnRestart(client, config, sql, shortcut, cacheData);
+  let restrictionFile = require("./commands/restriction.js");
+  restrictionFile.reloadOnRestart(cacheData);
   let skyscrapersFile = require("./routines/skyscrapers.js");
   skyscrapersFile.run(client, config, sql);
 });
@@ -60,7 +59,7 @@ client.on("message", async (message) => {
     }
   }
   let moneypileFile = require("./routines/moneypile.js");
-  await moneypileFile.run(client, message, config, sql, moneypileCache);
+  await moneypileFile.run(client, message, config, sql, cacheData.moneypileCache);
 });
 
 client.on("channelDelete", async (channel) => {
@@ -70,20 +69,22 @@ client.on("channelDelete", async (channel) => {
 
 async function runCommand(command, message) {
   if(command.name === "moneydrop") {
-    moneypileCache.refresh = true;
+    cacheData.moneypileCache.refresh = true;
   }
-  if(command.name === "moneygrab" && moneypileCache.list.hasOwnProperty(message.channel.id)) {
-    moneypileCache.list[message.channel.id].grabbed = true;
+  if(command.name === "moneygrab" && cacheData.moneypileCache.list.hasOwnProperty(message.channel.id)) {
+    cacheData.moneypileCache.list[message.channel.id].grabbed = true;
   }
   if(command.name === "cooldown") {
-    cooldownCache.refresh = true;
+    cacheData.cooldownCache.refresh = true;
   }
   let commandSanitize = /\b\w+\b/; //test for anything other than [a-z], [A-Z], [0-9], or '_'. reject if found.
   if(commandSanitize.test(command.name)) {
     try {
+      let restrictionsFile = require("./routines/restrictions.js");
+      let restrictionOk = restrictionsFile.checkRestriction(client, message, command, config, cacheData);
       let cooldownsFile = require("./routines/cooldowns.js");
-      let cooldownOK = await cooldownsFile.checkCooldown(client, message, command, config, sql, cooldownCache);
-      if(cooldownOK) {
+      let cooldownOk = await cooldownsFile.checkCooldown(client, message, command, config, sql, cacheData.cooldownCache);
+      if(restrictionOk && cooldownOk) {
         try {
           let commandFile = require(`./commands/${command.name}.js`);
           await commandFile.run(client, message, command, config, sql, shortcut, cacheData);
@@ -92,9 +93,9 @@ async function runCommand(command, message) {
             console.log(err);
           }
         }
-        await cooldownsFile.updateCooldown(client, message, command, config, sql, cooldownCache);
-      } else {
-        await cooldownsFile.punish(client, message, command, config, sql, cooldownCache);
+        await cooldownsFile.updateCooldown(client, message, command, config, sql, cacheData.cooldownCache);
+      } else if(!cooldownOk) {
+        await cooldownsFile.punish(client, message, command, config, sql, cacheData.cooldownCache);
       }
     } catch (err) {
       console.error(err);
@@ -103,7 +104,7 @@ async function runCommand(command, message) {
 }
 
 async function runKeyword(command, message) {
-  let kw = keywordData[command.name + message.author.id];
+  let kw = cacheData.keywordData[command.name + message.author.id];
   let commandFile = require(`./commands/${kw.command}.js`);
   await commandFile.runKeyword(client, message, command, config, sql, cacheData);
 }
@@ -123,7 +124,7 @@ function parseForCommands(message, authorID) {
     } else if(line.startsWith(config.aliasPrefix)) {
       command.type = "alias";
       command.name = lineSplit[0].slice(config.aliasPrefix.length);
-    } else if(keywordData.hasOwnProperty(lineSplit[0] + authorID) || keywordData.hasOwnProperty(lineSplit[0] + "0")) {
+    } else if(cacheData.keywordData.hasOwnProperty(lineSplit[0] + authorID) || cacheData.keywordData.hasOwnProperty(lineSplit[0] + "0")) {
       command.type = "keyword";
       command.name = lineSplit[0];
     }

@@ -17,5 +17,7 @@
   "pause": "wait",
   "maze": "hedgemaze",
   "sky": "skyscraper",
-  "h": "help"
+  "h": "help",
+  "restrict": "restriction",
+  "limit": "restriction"
 }
