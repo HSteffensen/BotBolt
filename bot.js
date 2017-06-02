@@ -126,8 +126,7 @@ function parseForCommands(message, authorID) {
   let commandRegexp = /([^\;]+\"[^\"]*\"[^\;]*|[^\;]+)/g; //splits commands by semicolon or allows semicolons inside a single pair of ""
   let messageSplit = message.match(commandRegexp);
   if(messageSplit == null) {
-    console.log("messageSplit is null in parseForCommands().");
-    return;
+    return [];
   }
   let commands = messageSplit.map((line) => {
     line = line.trim();
