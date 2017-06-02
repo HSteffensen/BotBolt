@@ -393,7 +393,7 @@ async function buyEarthquake(user, sql, magnitude, verbose) {
       console.error(e);
     }
     let s = (count != 1) ? "s" : "";
-    let output = `You caused an earthquake that knocked the top off of ${count} skyscraper${s}\nand delayed everyone's building progress for \$${cost}.`;
+    let output = `You caused an earthquake that knocked the top off of ${count} skyscraper${s} and delayed everyone's building progress for \$${cost}.`;
     if(verbose) {
       output += `\n**${user.tag}** \$${balance} => \$${remaining}`;
     }
