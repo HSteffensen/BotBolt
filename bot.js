@@ -26,6 +26,7 @@ client.login(config.token);
 
 client.on("ready", () => {
   console.log("I am ready!");
+  client.user.setGame(config.gameDefault);
   let hedgemazeFile = require("./commands/hedgemaze.js");
   hedgemazeFile.reloadOnRestart(client, config, sql, shortcut, cacheData);
   let restrictionFile = require("./commands/restriction.js");
