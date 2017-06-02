@@ -1,6 +1,6 @@
 # Special
 ### Help
-Points [here](https://github.com/HSteffensen/BotBolt/wiki/Help).  
+Points [here](https://hsteffensen.github.io/BotBolt/).  
 `!help`
 
 ### Alias
