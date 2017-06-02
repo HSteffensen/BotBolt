@@ -56,8 +56,21 @@ exports.run = async (client, message, config, sql, data) => {
           console.log(e);
         }
       }
-    }
-    if(channelData.verbosity == 2) {
+    } else if(channelData.verbosity == 2) {
+      //same as 1 but every drop
+      try {
+        let alertMsg = await message.channel.send("", {embed: {
+          color: config.color,
+          description: `There is a pile of money with \$${result}.`
+        }});
+        if(message.channel.permissionsFor(client.user).has("MANAGE_MESSAGES")) {
+          await sleep(config.deleteTimer * 1000);
+          await alertMsg.delete();
+        }
+      } catch(e) {
+        console.log(e);
+      }
+    } else if(channelData.verbosity == 3) {
       message.channel.send("", {embed: {
         color: config.color,
         description: `There is a pile of money with \$${result}.`

@@ -67,7 +67,8 @@ async function checkMoneydrop(client, message, command, config, sql, channels) {
         let verbosityOutput = {
           "0": "None",
           "1": "Low",
-          "2": "High"
+          "2": "Medium",
+          "3": "High"
         };
         description += `${channel}\n`;
         description += `Enabled: ${(row.dropMoney == 1)}. Verbosity: ${verbosityOutput[row.verbosity]}\n`;
@@ -151,14 +152,15 @@ async function setProperty(client, message, command, config, sql, channels) {
       return message.reply(`set ${args[1]} requires a decimal number from 0 to 1.`);
     }
   }  else if(args[1] === "verbosity") {
-    let verbosityCheck = /\b(0|1|2|none|low|high)\b/;
+    let verbosityCheck = /\b(0|1|2|none|low|medium|high)\b/;
     if(!verbosityCheck.test(input)) {
       return message.reply(`set ${args[1]} requires 0, 1, or 2.`);
     }
     let verbosityMap = {
       "none": "0",
       "low": "1",
-      "high": "2"
+      "medium": "2",
+      "high": "3"
     };
     input = (verbosityMap[input]) ? verbosityMap[input] : input;
   } else {
@@ -192,7 +194,8 @@ async function setProperty(client, message, command, config, sql, channels) {
       let verbosityOutput = {
         "0": "none",
         "1": "low",
-        "2": "high"
+        "2": "medium",
+        "3": "high"
       };
       description += `${channel} ${args[1]} set to ${verbosityOutput[input]}.\n`;
     } else {
