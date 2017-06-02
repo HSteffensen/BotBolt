@@ -1,4 +1,5 @@
 # Money
+
 |---
 | Name | Description | Shortcut |
 |:-|:-:|-:|
@@ -7,6 +8,7 @@
 | [moneygrab](https://hsteffensen.github.io/BotBolt/commands/moneygrab.html) | Grab money in the channel | `!grab` |
 
 # Games
+
 |---
 | Name | Description | Shortcut |
 |:-|:-:|-:|
@@ -14,6 +16,7 @@
 | [skyscraper](https://hsteffensen.github.io/BotBolt/commands/skyscraper.html) | Build the tallest skyscraper | `!sky` |
 
 # Useful
+
 |---
 | Name | Description | Shortcut |
 |:-|:-------:|--------:|
