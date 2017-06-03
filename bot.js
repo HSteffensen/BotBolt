@@ -73,13 +73,7 @@ client.on("channelDelete", async (channel) => {
 
 async function runCommand(command, message) {
   if(deleteInstantly[command.name]) {
-    if(message.channel.permissionsFor(client.user).has("MANAGE_MESSAGES")) {
-      try {
-        message.delete();
-      } catch(e) {
-        console.error(e);
-      }
-    }
+    deleteMessageDelayed(message);
   }
   if(command.name === "moneydrop") {
     cacheData.moneypileCache.refresh = true;
@@ -176,4 +170,20 @@ async function unpackAlias(aliasName) {
       await sql.run("CREATE TABLE IF NOT EXISTS alias (name TEXT, commands TEXT)");
     }
   }
+}
+
+async function deleteMessageDelayed(message) {
+  await sleep(100);
+  if(message.channel.permissionsFor(client.user).has("MANAGE_MESSAGES")) {
+    try {
+      message.delete();
+    } catch(e) {
+      console.error(e);
+    }
+  }
+}
+
+// From http://stackoverflow.com/a/39914235
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
