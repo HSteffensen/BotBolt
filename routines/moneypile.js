@@ -48,10 +48,7 @@ exports.run = async (client, message, config, sql, data) => {
             color: config.color,
             description: `There is a pile of money with \$${result}.`
           }});
-          if(message.channel.permissionsFor(client.user).has("MANAGE_MESSAGES")) {
-            await sleep(config.deleteTimer * 1000);
-            await alertMsg.delete();
-          }
+          deleteAlert(client, config, alertMsg);
         } catch(e) {
           console.log(e);
         }
@@ -63,10 +60,7 @@ exports.run = async (client, message, config, sql, data) => {
           color: config.color,
           description: `There is a pile of money with \$${result}.`
         }});
-        if(message.channel.permissionsFor(client.user).has("MANAGE_MESSAGES")) {
-          await sleep(config.deleteTimer * 1000);
-          await alertMsg.delete();
-        }
+        deleteAlert(client, config, alertMsg);
       } catch(e) {
         console.log(e);
       }
@@ -118,6 +112,13 @@ async function updateMoneypileSize(sql, data) {
         await sql.run("CREATE TABLE IF NOT EXISTS moneydrop (channelID TEXT, dropMoney INTEGER, pileSize INTEGER, verbosity INTEGER, firstMin INTEGER, firstMax INTEGER, firstProbability FLOAT, secondMin INTEGER, secondMax INTEGER, secondProbability FLOAT, thirdMin INTEGER, thirdMax INTEGER, thirdProbability FLOAT)");
       }
     }
+  }
+}
+
+async function deleteAlert(client, config, alertMsg) {
+  if(alertMsg.channel.permissionsFor(client.user).has("MANAGE_MESSAGES")) {
+    await sleep(config.deleteTimer * 1000);
+    await alertMsg.delete();
   }
 }
 

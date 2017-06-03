@@ -1,5 +1,5 @@
 # Cooldown
-Check your cooldowns on commands.
+Check your cooldowns on commands.  
 `!cooldown`
 
 ## Bot Owner only
