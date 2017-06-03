@@ -18,7 +18,9 @@ Soon...
 Don't have many good ideas in this category.
 
 ### Moneymaking Strategy
-Type `!grab` in a channel when a message pops up. Most channels on Tazem have low verbosity, so you'll see a message once it's big enough to actually matter.
+Type `!grab` in a channel when a message pops up. Most channels on Tazem have low verbosity, so you'll see a message once it's big enough to actually matter. The `!grab` command has a 1 hour cooldown, so using it on random channels isn't actually great.
+
+Grabbing money will not get you the whole pile, unless it is small.
 
 ## Money Commands
 
