@@ -14,7 +14,7 @@ exports.run = async (client, message, command, config, sql, shortcut, cacheData)
   }
 
   if(args.length < 1) {
-    message.reply("syntax: `!restriction name (channels)`");
+    return message.reply("syntax: `!restriction name (channels)`");
   }
 
   let channels = (message.mentions.channels.array().length > 0) ? message.mentions.channels.array() : [message.channel];

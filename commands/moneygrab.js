@@ -67,10 +67,7 @@ exports.run = async (client, message, command, config, sql, shortcut, cacheData)
         color: config.color,
         description: `${author.tag} grabbed \$${grabbed} from the money pile.`
       }});
-      if(channel.permissionsFor(client.user).has("MANAGE_MESSAGES")) {
-        await sleep(config.deleteTimer * 1000);
-        await alertMsg.delete();
-      }
+      deleteAlert(client, config, alertMsg);
     } catch(e) {
       console.log(e);
     }
@@ -82,6 +79,13 @@ exports.run = async (client, message, command, config, sql, shortcut, cacheData)
     }});
   }
 };
+
+async function deleteAlert(client, config, alertMsg) {
+  if(alertMsg.channel.permissionsFor(client.user).has("MANAGE_MESSAGES")) {
+    await sleep(config.deleteTimer * 1000);
+    await alertMsg.delete();
+  }
+}
 
 // From http://stackoverflow.com/a/39914235
 function sleep(ms) {

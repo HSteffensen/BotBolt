@@ -19,5 +19,6 @@
   "sky": "skyscraper",
   "h": "help",
   "restrict": "restriction",
-  "limit": "restriction"
+  "limit": "restriction",
+  "cd": "cooldown"
 }

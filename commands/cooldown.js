@@ -1,4 +1,4 @@
-exports.run = async (client, message, command, config, sql, shortcut) => {
+exports.run = async (client, message, command, config, sql, shortcut, cacheData) => {
   let args = command.args;
   // Caller must be bot owner
   let permitted = false;
@@ -10,12 +10,8 @@ exports.run = async (client, message, command, config, sql, shortcut) => {
       break;
     }
   }
-  if(!permitted) {
-    return message.reply("Permission denied: cooldown");
-  }
-
-  if(args.length < 1) {
-    return message.reply("Bad request: must provide a command name.");
+  if(!permitted || args.length < 1) {
+    return await checkPersonalTimers(client, message, command, config, cacheData.cooldownCache);
   }
 
   if(args[0] === "reloaddefaults") {
@@ -76,6 +72,34 @@ exports.run = async (client, message, command, config, sql, shortcut) => {
 
   await setCooldown(client, message, command, config, sql, commandName);
 };
+
+async function checkPersonalTimers(client, message, command, config, data) {
+  let ownTimers = Object.keys(data.timers).filter((item) => {
+    return item.indexOf(`${message.author.id}`) > -1;
+  }).map((item) => {
+    return data.timers[item];
+  });
+
+  let description = "";
+  let timestamp = message.createdTimestamp;
+  for(let i = 0; i < ownTimers.length; i++) {
+    let timer = ownTimers[i];
+    let timeleft = Math.floor((timer.startTime + timer.downtime - timestamp) / (60 * 1000));
+    if(timeleft > 0){
+      description += `\n**${timeleft} minutes** until you can use **!${timer.commandName}**.`;
+    } else if(timeleft == 0) {
+      description += `\n\**<1 minute** until you can use **!${timer.commandName}**.`;
+    }
+  }
+  if(description === "") {
+    description = "You have no commands on cooldown.";
+  }
+
+  message.channel.send("", {embed: {
+    color: config.color,
+    description: description
+  }});
+}
 
 async function checkCooldown(client, message, command, config, sql, commandName) {
   let time = 0;
