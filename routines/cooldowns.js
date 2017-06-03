@@ -87,10 +87,7 @@ exports.punish = async (client, message, command, config, sql, data) => {
         color: config.color,
         description: description
       }});
-      if(message.channel.permissionsFor(client.user).has("MANAGE_MESSAGES")) {
-        await sleep(config.deleteTimer * 1000);
-        await alertMsg.delete();
-      }
+      deleteAlert(client, config, alertMsg);
     } catch(e) {
       console.log(e);
     }
@@ -120,6 +117,13 @@ async function refreshCooldownCache(sql, data) {
       console.log("Creating table cooldowns");
       await sql.run("CREATE TABLE IF NOT EXISTS cooldowns (commandName TEXT, downtime INTEGER, verbosity INTEGER, punishment INTEGER)");
     }
+  }
+}
+
+async function deleteAlert(client, config, alertMsg) {
+  if(alertMsg.channel.permissionsFor(client.user).has("MANAGE_MESSAGES")) {
+    await sleep(config.deleteTimer * 1000);
+    await alertMsg.delete();
   }
 }
 

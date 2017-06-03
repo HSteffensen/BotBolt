@@ -10,7 +10,7 @@ exports.run = async (client, message, command, config, sql, shortcut, cacheData)
       break;
     }
   }
-  if(!permitted || args.length < 1) {
+  if(!permitted || args.length < 1 || message.mentions.users.size > 0) {
     return await checkPersonalTimers(client, message, command, config, cacheData.cooldownCache);
   }
 
@@ -74,8 +74,9 @@ exports.run = async (client, message, command, config, sql, shortcut, cacheData)
 };
 
 async function checkPersonalTimers(client, message, command, config, data) {
+  let userID = (message.mentions.users.first()) ? message.mentions.users.first() : message.author.id;
   let ownTimers = Object.keys(data.timers).filter((item) => {
-    return item.indexOf(`${message.author.id}`) > -1;
+    return item.indexOf(`${userID}`) > -1;
   }).map((item) => {
     return data.timers[item];
   });
@@ -92,7 +93,7 @@ async function checkPersonalTimers(client, message, command, config, data) {
     }
   }
   if(description === "") {
-    description = "You have no commands on cooldown.";
+    description = "No commands on cooldown.";
   }
 
   message.channel.send("", {embed: {
