@@ -21,6 +21,7 @@
 | Name | Description | Shortcut |
 |:-|:-|:-|
 | [alias](https://hsteffensen.github.io/BotBolt/commands/alias.html) | Assign a new name for some commands | none |
+| [cooldown](https://hsteffensen.github.io/BotBolt/commands/cooldown.html) | Check cooldown information | `!cd` |
 | [echo](https://hsteffensen.github.io/BotBolt/commands/echo.html) | Repeat a message | none |
 | [help](https://hsteffensen.github.io/BotBolt/commands/help.html) | Get bot information | `!h` |
 | [ping](https://hsteffensen.github.io/BotBolt/commands/ping.html) | Useless, but not pointless | none |
@@ -32,7 +33,6 @@
 | Name | Description | Shortcut |
 |:-|:-|:-|
 | addmoney | Add money to someone's balance | `!add` |
-| cooldown | Set a cooldown for a command | none |
 | moneydrop | Set money drops in a channel | none |
 | reload | Reload a command's file | `!r` |
 | restriction | Restrict channels for a command | none |
