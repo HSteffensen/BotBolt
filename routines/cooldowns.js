@@ -68,7 +68,7 @@ exports.punish = async (client, message, command, config, sql, data) => {
       description = `\n${commandData.punishment} seconds added to your timer.`;
     }
     try {
-      await sql.run("UPDATE cooldownTimers SET downtime = ? WHERE userIDcommandName = ?", [data.downtime, authorID + commandName]);
+      await sql.run("UPDATE cooldownTimers SET downtime = ? WHERE userIDcommandName = ?", [data.timers[authorID + commandName].downtime, authorID + commandName]);
     } catch(e) {
       console.error(e);
     }
