@@ -42,7 +42,7 @@ exports.run = async (client, message, config, sql, data) => {
     }
 
     if(channelData.verbosity == 1) {
-      if(Math.random() < 0.1) { //one in every 10 drops
+      if(channelData.pileSize > channelData.secondMin) { //only alert once larger than a point
         try {
           let alertMsg = await message.channel.send("", {embed: {
             color: config.color,
