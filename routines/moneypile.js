@@ -15,14 +15,16 @@ exports.run = async (client, message, config, sql, data) => {
   }
 
   let dropSize = 0;
-
-  if(Math.random() < channelData.firstProbability) {
+  let firstDrop = Math.random() < channelData.firstProbability;
+  let secondDrop = Math.random() < channelData.secondProbability;
+  let thirdDrop = Math.random() < channelData.thirdProbability;
+  if(firstDrop) {
     dropSize += Math.floor(Math.random() * (channelData.firstMax - channelData.firstMin) + channelData.firstMin);
   }
-  if(Math.random() < channelData.secondProbability) {
+  if(secondDrop) {
     dropSize += Math.floor(Math.random() * (channelData.secondMax - channelData.secondMin) + channelData.secondMin);
   }
-  if(Math.random() < channelData.thirdProbability) {
+  if(thirdDrop) {
     dropSize += Math.floor(Math.random() * (channelData.thirdMax - channelData.thirdMin) + channelData.thirdMin);
   }
 
@@ -42,7 +44,9 @@ exports.run = async (client, message, config, sql, data) => {
     }
 
     if(channelData.verbosity == 1) {
-      if(channelData.pileSize > channelData.secondMin) { //only alert once larger than a point
+      let highDrop = (thirdDrop) ? (Math.random() < 0.5) : true; //50% to not alert a big drop
+      let midDrop = (secondDrop) ? (Math.random() < 0.75) : true; //25% to not alert a big drop
+      if(channelData.pileSize > channelData.secondMin && highDrop && midDrop) { //only alert once larger than a point
         try {
           let alertMsg = await message.channel.send("", {embed: {
             color: config.color,
