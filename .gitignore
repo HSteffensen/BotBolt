@@ -4,3 +4,4 @@ config.json
 database.sqlite
 data*.json
 help.json
+failed
