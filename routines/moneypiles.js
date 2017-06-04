@@ -103,8 +103,18 @@ function spammed(client, message, channelData) {
       infractions: 0
     };
   }
-  
-  return spammedGeneral || spammedSpecific;
+
+  let fuckyournakedogambling = {
+    "$bf": true,
+    "$betflip": true,
+    "$br": true,
+    "$betroll": true,
+    "$slot": true
+  };
+  let firstWord = message.content.split(" ")[0];
+  let spammedBanned = fuckyournakedogambling.hasOwnProperty(firstWord);
+
+  return spammedGeneral || spammedSpecific || spammedBanned;
 }
 
 function generalAntispam(client, message, channelData) {
