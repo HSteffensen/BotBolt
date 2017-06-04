@@ -62,7 +62,7 @@ client.on("message", async (message) => {
       await runKeyword(commands[i], message);
     }
   }
-  let moneypileFile = require("./routines/moneypile.js");
+  let moneypileFile = require("./routines/moneypiles.js");
   await moneypileFile.run(client, message, config, sql, cacheData.moneypileCache);
 });
 
