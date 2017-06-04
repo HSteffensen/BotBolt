@@ -13,7 +13,7 @@ exports.run = (client, message, command, config, sql, shortcut) => {
     return message.reply("Permission denied: reload");
   }
 
-  if(args[0] === "routine") {
+  if((args[0] === "routine" || args[0] === "r") && args.length == 2) {
     try {
       delete require.cache[require.resolve(`../routines/${args[1]}.js`)];
     } catch(e) {

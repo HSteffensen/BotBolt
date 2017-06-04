@@ -14,6 +14,10 @@ exports.run = async (client, message, config, sql, data) => {
     return;
   }
 
+  if(spammed(client, message, channelData)) {
+    return;
+  }
+
   let dropSize = 0;
   let firstDrop = Math.random() < channelData.firstProbability;
   let secondDrop = Math.random() < channelData.secondProbability;
@@ -54,7 +58,7 @@ exports.run = async (client, message, config, sql, data) => {
           }});
           deleteAlert(client, config, alertMsg);
         } catch(e) {
-          console.log(e);
+          console.error(e);
         }
       }
     } else if(channelData.verbosity == 2) {
@@ -66,7 +70,7 @@ exports.run = async (client, message, config, sql, data) => {
         }});
         deleteAlert(client, config, alertMsg);
       } catch(e) {
-        console.log(e);
+        console.error(e);
       }
     } else if(channelData.verbosity == 3) {
       message.channel.send("", {embed: {
@@ -77,6 +81,93 @@ exports.run = async (client, message, config, sql, data) => {
   }
 };
 
+function spammed(client, message, channelData) {
+  let spammedGeneral = false;
+  if(channelData.timers.hasOwnProperty(message.author.id)) {
+    spammedGeneral = generalAntispam(client, message, channelData);
+  } else {
+    channelData.timers[message.author.id] = {
+      start: message.createdTimestamp,
+      downtime: 10 * 1000,
+      infractions: 0
+    };
+  }
+
+  let spammedSpecific = false;
+  if(channelData.timers.hasOwnProperty(message.author.id + message.content)) {
+    spammedSpecific = specificAntispam(client, message, channelData);
+  } else {
+    channelData.timers[message.author.id + message.content] = {
+      start: message.createdTimestamp,
+      downtime: 30 * 1000,
+      infractions: 0
+    };
+  }
+  
+  return spammedGeneral || spammedSpecific;
+}
+
+function generalAntispam(client, message, channelData) {
+  let userID = message.author.id;
+  let timestamp = message.createdTimestamp;
+  let timeData = channelData.timers[userID];
+  let endTime = timeData.start + timeData.downtime;
+  let timeBetween = timestamp - timeData.start;
+  let timeLeft = endTime - timestamp;
+
+  if(timeLeft > 0) {
+    if(timeBetween < (5 * 1000)) {
+      timeData.infractions++;
+    }
+    if(timeData.infractions < 10) {
+      timeData.start = timestamp;
+    }
+    if(timeData.infractions > 2) {
+      if(timeData.infractions == 10) {
+        timeData.downtime = 10 * 60 * 1000;
+        message.reply("please do not spam in an attempt to get money to drop. Money will not drop from your messages for the next hour. **If this was triggered during normal conversation,** let Henry know so he can relax the anti-spam or fix any bugs.");
+      } else if(timeData.infractions < 10) {
+        if(timeLeft > (timeData.downtime / 2)) {
+          if(timeData.downtime < (60 * 1000)) {
+            timeData.downtime += 1 * 1000;
+          }
+        }
+      }
+      return true;
+    }
+    //continue dropping for less than 2 infractions
+  } else {
+    channelData.timers[userID] = {
+      start: timestamp,
+      downtime: 20 * 1000,
+      infractions: 0
+    };
+  }
+  return false;
+}
+
+function specificAntispam(client, message, channelData) {
+  let userID = message.author.id;
+  let timestamp = message.createdTimestamp;
+  let timeData = channelData.timers[userID + message.content];
+  let endTime = timeData.start + timeData.downtime;
+  let timeLeft = endTime - timestamp;
+
+  //this anti-spam isnt as harsh so the timer is long
+  if(timeLeft > 0) {
+    timeData.infractions++;
+    timeData.start = timestamp;
+    return true;
+  } else {
+    channelData.timers[message.author.id + message.content] = {
+      start: message.createdTimestamp,
+      downtime: 60 * 1000,
+      infractions: 0
+    };
+  }
+  return false;
+}
+
 async function refreshMoneypileCache(sql, data) {
   data.refresh = false;
   data.list = {};
@@ -86,6 +177,8 @@ async function refreshMoneypileCache(sql, data) {
       let channelID = rows[i].channelID;
       data.list[channelID] = rows[i];
       data.list[channelID].update = false;
+      data.list[channelID].grabbed = false;
+      data.list[channelID].timers = {};
     }
   } catch(e) {
     console.error(e);
@@ -101,7 +194,7 @@ async function updateMoneypileSize(sql, data) {
   for(let i = 0; i < channels.length; i++) {
     let channelID = channels[i];
     let channelData = data.list[channelID];
-    channelData.grabbed = false;
+    data.list[channelID].grabbed = false;
     try{
       let row = await sql.get("SELECT * FROM moneydrop WHERE channelID = ?", [channelID]);
       if(row) {
