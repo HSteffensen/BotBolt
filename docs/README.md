@@ -6,4 +6,4 @@ This bot is not meant to handle more than one Discord server/guild. This bot is 
 
 [Commands](https://hsteffensen.github.io/BotBolt/commands.html)  
 [Usage](https://hsteffensen.github.io/BotBolt/usage.html)  
-[Money](https://hsteffensen.github.io/BotBolt/money.html)  
+[Money Info](https://hsteffensen.github.io/BotBolt/money_info.html)  

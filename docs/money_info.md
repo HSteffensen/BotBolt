@@ -22,6 +22,9 @@ Type `!grab` in a channel when a message pops up. Most channels on Tazem have lo
 
 Grabbing money will not get you the whole pile, unless it is small.
 
+#### Anti-spam
+There are measures in place to prevent rapid or repeated messages from having any chance to drop money. They should not get in the way of normal conversation, but let me know if they do.
+
 ## Money Commands
 
 |---
