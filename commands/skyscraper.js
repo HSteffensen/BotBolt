@@ -25,10 +25,10 @@ exports.run = async (client, message, command, config, sql) => {
     }
   } else if(args[0] === "earthquake") {
     let magnitude = parseInt(args[1]);
-    if(!isNaN(magnitude) && magnitude >= 1) {
+    if(!isNaN(magnitude) && magnitude >= 1 && magnitude <= 10) {
       description = await buyEarthquake(message.author, sql, magnitude, command.verbose);
     } else {
-      description = "Give a magnitude number: \`!skyscraper earthquake 1\`\nMagnitude 1 costs \$1, and each magnitude higher costs 2x more.";
+      description = "Give a magnitude number from 1 to 10: \`!skyscraper earthquake 1\`\nMagnitude 1 costs \$1, and each magnitude higher costs 2x more.";
     }
   } else if(args[0] === "sabotage") {
     let target = message.mentions.users.first();
@@ -277,7 +277,7 @@ async function buySabotage(user, sql, target, verbose) {
 async function buyStrike(user, sql, target, hours, verbose) {
   let userID = user.id;
   let targetID = target.id;
-  let cost = hours * (hours + 1) / 2;
+  let cost = hours * (hours - 1) / 2;
   let doStrike = false;
   let currentStrike = 0;
   var targetRow;
@@ -293,7 +293,7 @@ async function buyStrike(user, sql, target, hours, verbose) {
     if(doStrike) {
       userRow = await sql.get(`SELECT * FROM skyscraper WHERE userID ="${userID}"`);
       if(userRow) {
-        cost += userRow.workers * hours;
+        cost += Math.floor((userRow.workers + targetRow.workers) / 2 * hours);
         doStrike = (cost > 0);
       }
     }
@@ -354,8 +354,10 @@ async function buyStrike(user, sql, target, hours, verbose) {
 
 async function buyEarthquake(user, sql, magnitude, verbose) {
   let userID = user.id;
+  let possibleValues = [[10, 0.99], [20, 0.9801], [40, 0.960596], [80, 0.922745], [160, 0.851458], [320, 0.72498], [640, 0.525596], [1280, 0.276252], [2560, 0.076315], [5120, 0.00582398]];
   //calculate cost
-  let cost = Math.pow(2, magnitude - 1);
+  let [cost, factor] = possibleValues[magnitude - 1];
+  console.log(`${cost} ${factor}`);
   let balance = 0;
   //check if can afford
   try {
@@ -376,16 +378,17 @@ async function buyEarthquake(user, sql, magnitude, verbose) {
   //do the buy
   if(balance >= cost) {
     let remaining = balance - cost;
-    let factor = Math.pow(0.99, magnitude);
     let count = 0;
     try {
       await sql.run(`UPDATE money SET balance = ${remaining} WHERE userID = ${userID}`);
       let rows = await sql.all("SELECT * FROM skyscraper");
       for(let i = 0; i < rows.length; i++) {
         let row = rows[i];
-        let newHeight = Math.ceil(row.height * factor);
+        let total = row.height + row.progress;
+        total = total * factor;
+        let newHeight = Math.floor(total);
+        let newProgress = total - newHeight;
         count += (newHeight != row.height) ? 1 : 0;
-        let newProgress = row.progress * factor * factor;
         let targetID = row.userID;
         await sql.run("UPDATE skyscraper SET height = ?, progress = ? WHERE userID = ?", [newHeight, newProgress, targetID]);
       }
