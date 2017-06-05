@@ -38,7 +38,6 @@ client.on("ready", () => {
 client.on("message", async (message) => {
   if (message.author.bot) return; //ignore other bots
   let commands = parseForCommands(message.content, message.author.id);
-  let aliasCommands = [];
   for(let i = 0; i < commands.length; i++) {
     if (commands[i].type === "command") {
       await runCommand(commands[i], message);
@@ -51,7 +50,7 @@ client.on("message", async (message) => {
             description: `\"${commands[i].name}\" => \"${unpackedLine}\"`
           }});
         }
-        aliasCommands = parseForCommands(unpackedLine, message.author.id);
+        let aliasCommands = parseForCommands(unpackedLine, message.author.id);
         for(let j = 0; j < aliasCommands.length; j++) {
           if(aliasCommands[j].type === "command") {
             await runCommand(aliasCommands[j], message);

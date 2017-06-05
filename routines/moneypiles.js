@@ -134,6 +134,7 @@ function generalAntispam(client, message, channelData) {
     }
     if(timeData.infractions > 2) {
       if(timeData.infractions == 10) {
+        timeData.infractions++;
         timeData.downtime = 10 * 60 * 1000;
         message.reply("please do not spam in an attempt to get money to drop. Money will not drop from your messages for the next hour. **If this was triggered during normal conversation,** let Henry know so he can relax the anti-spam or fix any bugs.");
       } else if(timeData.infractions < 10) {
