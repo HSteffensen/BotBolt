@@ -357,7 +357,6 @@ async function buyEarthquake(user, sql, magnitude, verbose) {
   let possibleValues = [[10, 0.99], [20, 0.9801], [40, 0.960596], [80, 0.922745], [160, 0.851458], [320, 0.72498], [640, 0.525596], [1280, 0.276252], [2560, 0.076315], [5120, 0.00582398]];
   //calculate cost
   let [cost, factor] = possibleValues[magnitude - 1];
-  console.log(`${cost} ${factor}`);
   let balance = 0;
   //check if can afford
   try {
