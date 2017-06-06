@@ -84,6 +84,7 @@ exports.run = async (client, message, config, sql, data) => {
 function spammed(client, message, channelData) {
   let spammedMessage = messageAntispam(client, message, channelData);
   let spammedUser = userAntispam(client, message, channelData);
+  let spammedQuick = quickAntispam(client, message, channelData);
 
   let fuckyournakedogambling = {
     "$bf": true,
@@ -95,7 +96,31 @@ function spammed(client, message, channelData) {
   let firstWord = message.content.split(" ")[0];
   let spammedBanned = fuckyournakedogambling.hasOwnProperty(firstWord);
 
-  return spammedMessage || spammedUser || spammedBanned;
+  return spammedMessage || spammedUser || spammedQuick || spammedBanned;
+}
+
+//cancels drop if a user does too many messages too quickly, even if others post inbetween
+function quickAntispam(client, message, channelData) {
+  let userID = message.author.id;
+  let timeData = channelData.timers[userID];
+
+  if(channelData.timers.hasOwnProperty(userID)) {
+    let timestamp = message.createdTimestamp;
+    let endTime = timeData.start + timeData.downtime;
+    let timeLeft = endTime - timestamp;
+    if(timeLeft > 0) {
+      timeData.infractions++;
+      timeData.start = timestamp;
+      return (timeData.infractions > 2);
+    }
+  }
+
+  channelData.timers[userID] = {
+    start: message.createdTimestamp,
+    downtime: 5 * 1000,
+    infractions: 0
+  };
+  return false;
 }
 
 function userAntispam(client, message, channelData) {
@@ -148,6 +173,7 @@ async function refreshMoneypileCache(sql, data) {
       data.list[channelID] = rows[i];
       data.list[channelID].update = false;
       data.list[channelID].grabbed = false;
+      data.list[channelID].timers = {};
       data.list[channelID].lastMessage = {};
       data.list[channelID].lastSpeaker = {};
     }
