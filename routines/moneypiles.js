@@ -123,6 +123,7 @@ function quickAntispam(client, message, channelData) {
   return false;
 }
 
+//cancels a drop if a user sends multiple messages in a row without anyone else speaking
 function userAntispam(client, message, channelData) {
   let userID = message.author.id;
   let timestamp = message.createdTimestamp;
@@ -146,6 +147,7 @@ function userAntispam(client, message, channelData) {
   return false;
 }
 
+//cancels a drop if a user sends the same message multiple times in a row
 function messageAntispam(client, message, channelData) {
   let userID = message.author.id;
   let messageData = channelData.lastMessage[userID];

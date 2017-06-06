@@ -4,7 +4,7 @@ exports.checkCooldown = async (client, message, command, config, sql, data) => {
   let commandName = command.name;
   let timestamp = message.createdTimestamp;
 
-  if(data.refresh && command.name !== "cooldown") {
+  if(data.refresh && (command.name !== "cooldown" || command.args.length == 0)) {
     await refreshCooldownCache(sql, data); //should be run after time !cooldown is called ever
   }
 
