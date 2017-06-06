@@ -82,27 +82,8 @@ exports.run = async (client, message, config, sql, data) => {
 };
 
 function spammed(client, message, channelData) {
-  let spammedGeneral = false;
-  if(channelData.timers.hasOwnProperty(message.author.id)) {
-    spammedGeneral = generalAntispam(client, message, channelData);
-  } else {
-    channelData.timers[message.author.id] = {
-      start: message.createdTimestamp,
-      downtime: 10 * 1000,
-      infractions: 0
-    };
-  }
-
-  let spammedSpecific = false;
-  if(channelData.timers.hasOwnProperty(message.author.id + message.content)) {
-    spammedSpecific = specificAntispam(client, message, channelData);
-  } else {
-    channelData.timers[message.author.id + message.content] = {
-      start: message.createdTimestamp,
-      downtime: 30 * 1000,
-      infractions: 0
-    };
-  }
+  let spammedMessage = messageAntispam(client, message, channelData);
+  let spammedUser = userAntispam(client, message, channelData);
 
   let fuckyournakedogambling = {
     "$bf": true,
@@ -114,68 +95,46 @@ function spammed(client, message, channelData) {
   let firstWord = message.content.split(" ")[0];
   let spammedBanned = fuckyournakedogambling.hasOwnProperty(firstWord);
 
-  return spammedGeneral || spammedSpecific || spammedBanned;
+  return spammedMessage || spammedUser || spammedBanned;
 }
 
-function generalAntispam(client, message, channelData) {
+function userAntispam(client, message, channelData) {
   let userID = message.author.id;
   let timestamp = message.createdTimestamp;
-  let timeData = channelData.timers[userID];
-  let endTime = timeData.start + timeData.downtime;
-  let timeBetween = timestamp - timeData.start;
+  let endTime = channelData.lastSpeaker.start + channelData.lastSpeaker.downtime;
   let timeLeft = endTime - timestamp;
 
-  if(timeLeft > 0) {
-    if(timeBetween < (5 * 1000)) {
-      timeData.infractions++;
+  if(channelData.lastSpeaker.userID == userID) {
+    if(timeLeft > 0) {
+      channelData.lastSpeaker.infractions++;
+      channelData.lastSpeaker.start = timestamp;
+      return (channelData.lastSpeaker.infractions > 2);
     }
-    if(timeData.infractions < 10) {
-      timeData.start = timestamp;
-    }
-    if(timeData.infractions > 2) {
-      if(timeData.infractions == 10) {
-        timeData.infractions++;
-        timeData.downtime = 10 * 60 * 1000;
-        message.reply("please do not spam in an attempt to get money to drop. Money will not drop from your messages for the next hour. **If this was triggered during normal conversation,** let Henry know so he can relax the anti-spam or fix any bugs.");
-      } else if(timeData.infractions < 10) {
-        if(timeLeft > (timeData.downtime / 2)) {
-          if(timeData.downtime < (60 * 1000)) {
-            timeData.downtime += 1 * 1000;
-          }
-        }
-      }
-      return true;
-    }
-    //continue dropping for less than 2 infractions
-  } else {
-    channelData.timers[userID] = {
-      start: timestamp,
-      downtime: 20 * 1000,
-      infractions: 0
-    };
   }
+
+  channelData.lastSpeaker = {
+    userID: userID,
+    start: message.createdTimestamp,
+    downtime: 60 * 1000,
+    infractions: 0
+  };
   return false;
 }
 
-function specificAntispam(client, message, channelData) {
+function messageAntispam(client, message, channelData) {
   let userID = message.author.id;
-  let timestamp = message.createdTimestamp;
-  let timeData = channelData.timers[userID + message.content];
-  let endTime = timeData.start + timeData.downtime;
-  let timeLeft = endTime - timestamp;
+  let messageData = channelData.lastMessage[userID];
 
   //this anti-spam isnt as harsh so the timer is long
-  if(timeLeft > 0) {
-    timeData.infractions++;
-    timeData.start = timestamp;
-    return true;
-  } else {
-    channelData.timers[message.author.id + message.content] = {
-      start: message.createdTimestamp,
-      downtime: 60 * 1000,
-      infractions: 0
-    };
+  if(channelData.lastMessage.hasOwnProperty(userID) && messageData.content === message.content) {
+    messageData.infractions++;
+    return (messageData.infractions > 1);
   }
+
+  channelData.lastMessage[userID] = {
+    content: message.content,
+    infractions: 0
+  };
   return false;
 }
 
@@ -189,7 +148,8 @@ async function refreshMoneypileCache(sql, data) {
       data.list[channelID] = rows[i];
       data.list[channelID].update = false;
       data.list[channelID].grabbed = false;
-      data.list[channelID].timers = {};
+      data.list[channelID].lastMessage = {};
+      data.list[channelID].lastSpeaker = {};
     }
   } catch(e) {
     console.error(e);
