@@ -20,5 +20,6 @@
   "h": "help",
   "restrict": "restriction",
   "limit": "restriction",
-  "cd": "cooldown"
+  "cd": "cooldown",
+  "russia": "russianroulette"
 }

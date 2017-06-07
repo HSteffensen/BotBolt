@@ -18,6 +18,11 @@ let cacheData = {
     commands: {},
     timers: {}
   },
+  russiaData: {
+    active: false,
+    joinable: false,
+    players: []
+  },
   restrictionCache: {},
   keywordData: {}
 };
