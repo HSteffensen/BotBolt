@@ -57,7 +57,7 @@ exports.run = async (client, message, command, config, sql, shortcut, cacheData)
           data.active = true;
           data.joinable = true;
           description = `**${message.author.tag}** has started a game of Russian roulette with a default bet of \$${amount}.`;
-          description += "\nType \"!russianroulette\" to join. The game will begin in 60 seconds.";
+          description += "\nType \"!ru\" to join. The game will begin in 60 seconds.";
           runGame(client, message, config, sql, cacheData);
         } else {
           description = "You cannot afford that bet.";

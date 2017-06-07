@@ -14,7 +14,7 @@
 |:-|:-:|:-|
 | [hedgemaze](https://hsteffensen.github.io/BotBolt/commands/hedgemaze.html) | Solve a maze | `!maze` |
 | [skyscraper](https://hsteffensen.github.io/BotBolt/commands/skyscraper.html) | Build the tallest skyscraper | `!sky` |
-| [russianroulette](https://hsteffensen.github.io/BotBolt/commands/russianroulette.html) | Play Russian roulette with your friends | `!russia` |
+| [russianroulette](https://hsteffensen.github.io/BotBolt/commands/russianroulette.html) | Play Russian roulette with your friends | `!ru` |
 
 # Useful
 
