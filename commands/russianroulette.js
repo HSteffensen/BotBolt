@@ -21,7 +21,7 @@ exports.run = async (client, message, command, config, sql, shortcut, cacheData)
         }
         */
         if(validBet) {
-          let canAfford = makeBet(sql, message.author.id, amount);
+          let canAfford = await makeBet(sql, message.author.id, amount);
           if(canAfford) {
             data.players.push({
               id: message.author.id,
@@ -46,7 +46,8 @@ exports.run = async (client, message, command, config, sql, shortcut, cacheData)
     if(args.length == 1) {
       let amount = parseInt(args[0]);
       if(!isNaN(amount) && amount >= 0) {
-        let canAfford = makeBet(sql, message.author.id, amount);
+        let canAfford = await makeBet(sql, message.author.id, amount);
+        console.log(canAfford);
         if(canAfford) {
           data.players = [{
             id: message.author.id,
@@ -224,6 +225,7 @@ async function makeBet(sql, userID, amount) {
     let row = await sql.get(`SELECT * FROM money WHERE userID ="${userID}"`);
     if(!row) {
       await sql.run("INSERT INTO money (userID, balance) VALUES (?, ?)", [userID, 0]);
+      return (amount == 0);
     } else {
       let result = row.balance - amount;
       if(result >= 0) {
