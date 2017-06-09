@@ -47,7 +47,6 @@ exports.run = async (client, message, command, config, sql, shortcut, cacheData)
       let amount = parseInt(args[0]);
       if(!isNaN(amount) && amount >= 0) {
         let canAfford = await makeBet(sql, message.author.id, amount);
-        console.log(canAfford);
         if(canAfford) {
           data.players = [{
             id: message.author.id,
