@@ -43,15 +43,16 @@ exports.run = async (client, message, command, config, sql, shortcut, cacheData)
   }
 
   if(args[1] === "verbosity") {
-    let verbosityCheck = /\b(0|1|2|3|none|low|high|default)\b/;
+    let verbosityCheck = /\b(0|1|2|3|4|none|low|medium|high|default)\b/;
     if(!verbosityCheck.test(args[2])) {
       return message.reply("verbosity requires 0, 1, 2, or default.");
     }
     let verbosityMap = {
       "none": "0",
       "low": "1",
-      "high": "2",
-      "default": "3"
+      "medium": "2",
+      "high": "3",
+      "default": "4"
     };
     let input = (verbosityMap[args[2]]) ? verbosityMap[args[2]] : args[2];
     return await setVerbosity(client, message, command, config, sql, commandName, input);
@@ -87,7 +88,8 @@ async function checkPersonalTimers(client, message, command, config, data) {
     let timer = ownTimers[i];
     let timeleft = Math.floor((timer.startTime + timer.downtime - timestamp) / (60 * 1000));
     if(timeleft > 0){
-      description += `\n**${timeleft} minutes** until you can use **!${timer.commandName}**.`;
+      let s = (timeleft == 1) ? "" : "s";
+      description += `\n**${timeleft} minute${s}** until you can use **!${timer.commandName}**.`;
     } else if(timeleft == 0) {
       description += `\n\**<1 minute** until you can use **!${timer.commandName}**.`;
     }
@@ -125,7 +127,7 @@ async function checkCooldown(client, message, command, config, sql, commandName)
     }
   }
 
-  let verbosityOutput = ["\"none\"", "\"low\"", "\"high\"", "default to global setting"];
+  let verbosityOutput = ["\"none\"", "\"low\"", "\"medium\"", "\"high\"", "default to global setting"];
 
   if(!exists) {
     description = `**!${commandName}** has no cooldown configuration.`;
@@ -219,7 +221,7 @@ async function setVerbosity(client, message, command, config, sql, commandName, 
     }
   }
 
-  let verbosityOutput = ["\"none\"", "\"low\"", "\"high\"", "default to global setting"];
+  let verbosityOutput = ["\"none\"", "\"low\"", "\"medium\"", "\"high\"", "default to global setting"];
 
   message.channel.send("", {embed: {
     color: config.color,

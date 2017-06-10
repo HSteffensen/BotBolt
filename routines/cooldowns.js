@@ -64,8 +64,15 @@ exports.punish = async (client, message, command, config, sql, data) => {
 
   if(commandData.punishment > 0) {
     data.timers[authorID + commandName].downtime += commandData.punishment * 1000;
-    if(commandData.verbosity == 2) {
-      description = `\n${commandData.punishment} seconds added to your timer.`;
+    if(commandData.verbosity >= 2) {
+      let s = (commandData.punishment == 1) ? "" : "s";
+      let punishOutput = `${commandData.punishment} second${s}`;
+      if(commandData.punishment >= 60) {
+        let punishMinutes = Math.floor(commandData.punishment / 60);
+        s = (punishMinutes == 1) ? "" : "s";
+        punishOutput = `${punishMinutes} minute${s}`;
+      }
+      description = `\n${punishOutput} added to your timer.`;
     }
     try {
       await sql.run("UPDATE cooldownTimers SET downtime = ? WHERE userIDcommandName = ?", [data.timers[authorID + commandName].downtime, authorID + commandName]);
@@ -74,10 +81,15 @@ exports.punish = async (client, message, command, config, sql, data) => {
     }
   }
 
-  if(commandData.verbosity == 2) {
+  if(commandData.verbosity == 3) {
     let timer = data.timers[authorID + commandName];
-    let timeleft = Math.ceil((timer.startTime + timer.downtime - timestamp) / 1000);
-    description += `\n${timeleft} seconds until you can use **!${commandName}**.`;
+    let timeleft = Math.floor((timer.startTime + timer.downtime - timestamp) / (60 * 1000));
+    if(timeleft > 0){
+      let s = (timeleft == 1) ? "" : "s";
+      description += `\n**${timeleft} minute${s}** until you can use **!${timer.commandName}**.`;
+    } else if(timeleft == 0) {
+      description += `\n\**<1 minute** until you can use **!${timer.commandName}**.`;
+    }
   }
 
   if(commandData.verbosity == 1 || commandData.verbosity == 2) {
