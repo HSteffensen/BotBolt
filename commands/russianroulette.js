@@ -111,6 +111,11 @@ async function runGame(client, message, config, sql, cacheData) {
   //choose loser
   let killedRandom = Math.random();
   let killed = Math.floor(data.players.length * killedRandom);
+  let loser = data.players[killed];
+  if(checkIfRerollLoser(sql, loser.id)) {
+    killed = Math.floor(data.players.length * killedRandom);
+    loser = data.players[killed];
+  }
 
   try {
     for(let i = 0; i <= killed; i++) {
@@ -136,7 +141,6 @@ async function runGame(client, message, config, sql, cacheData) {
       }});
     }
 
-    let loser = data.players[killed];
     description += `\n\n**${loser.tag}** died!`;
     if(data.bet > 0) {
       description += " The rest of you can split their bet.";
@@ -147,6 +151,7 @@ async function runGame(client, message, config, sql, cacheData) {
     }});
 
     await distributeWinnings(sql, data, killed);
+    await recordOutcome(sql, data, killed);
   } catch(e) {
     console.error(e);
   }
@@ -160,6 +165,52 @@ function resetGame(cacheData) {
     joinable: false,
     players: []
   };
+}
+
+async function checkIfRerollLoser(sql, userID) {
+  let result = false;
+  try {
+    let row = await sql.get(`SELECT * FROM russianroulette WHERE userID ="${userID}"`);
+    if(!row) {
+      await sql.run("INSERT INTO russianroulette (userID, games, losses) VALUES (?, ?)", [userID, 0, 0]);
+    } else {
+      let record = row.losses / row.games;
+      if(record > 0.5) {
+        result = (Math.random() < (record - 0.5));
+      }
+    }
+  } catch(e) {
+    console.error(e);
+    if(e.message.startsWith("SQLITE_ERROR: no such table:")) {
+      console.log("Creating table russianroulette");
+      await sql.run("CREATE TABLE IF NOT EXISTS russianroulette (userID TEXT, games INTEGER, losses INTEGER)");
+      await sql.run("INSERT INTO russianroulette (userID, games, losses) VALUES (?, ?, ?)", [userID, 0, 0]);
+    }
+  }
+
+  return result;
+}
+
+async function recordOutcome(sql, data, killed) {
+  for(let i = 0; i < data.players.length; i++) {
+    let userID = data.players[i].id;
+    let isLoser = (killed == i) ? 1 : 0;
+    try {
+      let row = await sql.get(`SELECT * FROM russianroulette WHERE userID ="${userID}"`);
+      if(!row) {
+        await sql.run("INSERT INTO russianroulette (userID, games, losses) VALUES (?, ?, ?)", [userID, 1, isLoser]);
+      } else {
+        await sql.run(`UPDATE russianroulette SET games = ${row.games + 1}, losses = ${row.losses + isLoser} WHERE userID = ${userID}`);
+      }
+    } catch(e) {
+      console.error(e);
+      if(e.message.startsWith("SQLITE_ERROR: no such table:")) {
+        console.log("Creating table russianroulette");
+        await sql.run("CREATE TABLE IF NOT EXISTS russianroulette (userID TEXT, games INTEGER, losses INTEGER)");
+        await sql.run("INSERT INTO russianroulette (userID, games, losses) VALUES (?, ?, ?)", [userID, 1, isLoser]);
+      }
+    }
+  }
 }
 
 async function distributeWinnings(sql, data, killed) {
