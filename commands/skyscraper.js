@@ -28,7 +28,7 @@ exports.run = async (client, message, command, config, sql) => {
     if(!isNaN(magnitude) && magnitude >= 1 && magnitude <= 10) {
       description = await buyEarthquake(message.author, sql, magnitude, command.verbose);
     } else {
-      description = "Give a magnitude number from 1 to 10: \`!skyscraper earthquake 1\`\nMagnitude 1 costs \$1, and each magnitude higher costs 2x more.";
+      description = "Give a magnitude number from 1 to 10: \`!skyscraper earthquake 1\`\nMagnitude 1 costs \$10, and each magnitude higher costs 2x more than the last.";
     }
   } else if(args[0] === "sabotage") {
     let target = message.mentions.users.first();
