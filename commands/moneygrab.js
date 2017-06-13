@@ -65,7 +65,7 @@ exports.run = async (client, message, command, config, sql, shortcut, cacheData)
     try {
       let alertMsg = await channel.send("", {embed: {
         color: config.color,
-        description: `${author.tag} grabbed \$${grabbed} from the money pile.`
+        description: `**${author.tag}** grabbed \$${grabbed} from the money pile.`
       }});
       deleteAlert(client, config, alertMsg);
     } catch(e) {
