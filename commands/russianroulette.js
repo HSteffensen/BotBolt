@@ -43,30 +43,26 @@ exports.run = async (client, message, command, config, sql, shortcut, cacheData)
       description = "This game cannot be joined.";
     }
   } else { //make game
-    if(args.length == 1) {
-      let amount = parseInt(args[0]);
-      if(!isNaN(amount) && amount >= 0) {
-        let canAfford = await makeBet(sql, message.author.id, amount);
-        if(canAfford) {
-          data.players = [{
-            id: message.author.id,
-            tag: message.author.tag,
-            bet: amount
-          }];
-          data.bet = amount;
-          data.active = true;
-          data.joinable = true;
-          description = `**${message.author.tag}** has started a game of Russian roulette with a default bet of \$${amount}.`;
-          description += "\nType \"!ru\" to join. The game will begin in 60 seconds.";
-          runGame(client, message, config, sql, cacheData);
-        } else {
-          description = "You cannot afford that bet.";
-        }
-      } else {
-        description = "Give a bet amount: `!russianroulette 10`";
-      }
+    let amount = parseInt(args[0]);
+    if(isNaN(amount) || amount < 0) {
+      amount = 0;
+      description += "Defaulting to a bet of $0.\n";
+    }
+    let canAfford = await makeBet(sql, message.author.id, amount);
+    if(canAfford) {
+      data.players = [{
+        id: message.author.id,
+        tag: message.author.tag,
+        bet: amount
+      }];
+      data.bet = amount;
+      data.active = true;
+      data.joinable = true;
+      description += `**${message.author.tag}** has started a game of Russian roulette with a bet of \$${amount}.`;
+      description += "\nType \"!ru\" to join. The game will begin in 60 seconds.";
+      runGame(client, message, config, sql, cacheData);
     } else {
-      description = "Give a bet amount: `!russianroulette 10`";
+      description = "You cannot afford that bet.";
     }
   }
 
