@@ -168,7 +168,7 @@ async function checkIfRerollLoser(sql, userID) {
   try {
     let row = await sql.get(`SELECT * FROM russianroulette WHERE userID ="${userID}"`);
     if(!row) {
-      await sql.run("INSERT INTO russianroulette (userID, games, losses) VALUES (?, ?)", [userID, 0, 0]);
+      await sql.run("INSERT INTO russianroulette (userID, games, losses) VALUES (?, ?, ?)", [userID, 0, 0]);
     } else {
       let record = row.losses / row.games;
       if(record > 0.5) {
