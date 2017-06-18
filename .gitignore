@@ -1,7 +1,7 @@
 node_modules
 config.json
 .eslintrc.json
-database.sqlite
+database.sqlite*
 data*.json
 help.json
 failed

@@ -251,9 +251,7 @@ async function buySabotage(user, sql, target, verbose) {
     let newWorkers = Math.floor(currentWorkers * 0.9);
     let killedWorkers = currentWorkers - newWorkers;
     try {
-      if(skyRow) {
-        await sql.run("UPDATE skyscraper SET workers = ? WHERE userID = ?", [newWorkers, targetID]);
-      }
+      await sql.run("UPDATE skyscraper SET workers = ? WHERE userID = ?", [newWorkers, targetID]);
       await sql.run(`UPDATE money SET balance = ${remaining} WHERE userID = ${userID}`);
     } catch(e) {
       console.error(e);
