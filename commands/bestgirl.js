@@ -260,13 +260,26 @@ async function voteGirl(client, message, command, sql) {
     }
   }
 
-  //remove votes from previously voted girl
-  if(removedName !== "" && removedVotes != 0) {
-    try {
-      let girlRow = await sql.get("SELECT * FROM bestgirls WHERE name = ?", [removedName]);
-      if(girlRow) {
-        await sql.run("UPDATE bestgirls SET votes = ? WHERE name = ?", [girlRow.votes - removedVotes, removedName]);
+  if(removedName !== girlName) {
+    //remove votes from previously voted girl
+    if(removedName !== "" && removedVotes != 0) {
+      try {
+        let girlRow = await sql.get("SELECT * FROM bestgirls WHERE name = ?", [removedName]);
+        if(girlRow) {
+          await sql.run("UPDATE bestgirls SET votes = ? WHERE name = ?", [girlRow.votes - removedVotes, removedName]);
+        }
+      } catch(e) {
+        console.error(e);
+        if(e.message.startsWith("SQLITE_ERROR: no such table:")) {
+          console.log("Creating table bestgirls");
+          await sql.run("CREATE TABLE IF NOT EXISTS bestgirls (name TEXT, description TEXT, image TEXT, nominator TEXT, votes INTEGER)");
+        }
       }
+    }
+    
+    //update votes for voted girl
+    try {
+      await sql.run("UPDATE bestgirls SET votes = ? WHERE name = ?", [girlVotes + removedVotes, girlName]);
     } catch(e) {
       console.error(e);
       if(e.message.startsWith("SQLITE_ERROR: no such table:")) {
@@ -276,16 +289,6 @@ async function voteGirl(client, message, command, sql) {
     }
   }
 
-  //update votes for voted girl
-  try {
-    await sql.run("UPDATE bestgirls SET votes = ? WHERE name = ?", [girlVotes + removedVotes, girlName]);
-  } catch(e) {
-    console.error(e);
-    if(e.message.startsWith("SQLITE_ERROR: no such table:")) {
-      console.log("Creating table bestgirls");
-      await sql.run("CREATE TABLE IF NOT EXISTS bestgirls (name TEXT, description TEXT, image TEXT, nominator TEXT, votes INTEGER)");
-    }
-  }
 
   return `You voted for ${girlName}.`;
 }
