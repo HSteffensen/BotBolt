@@ -217,6 +217,9 @@ async function setGirl(sql, userID, name, description, image, type) {
 async function voteGirl(client, message, command, sql) {
   let args = command.args;
   let userID = message.author.id;
+  if(args.length == 0) {
+    return "Give a name of a girl to vote for.";
+  }
   let girlName = args.splice(1, args.length).join(" ");
   let girlVotes = 0;
 
