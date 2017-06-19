@@ -399,14 +399,14 @@ async function buyVote(client, message, command, sql) {
   try {
     let voterRow = await sql.get("SELECT * FROM bestgirlvoters WHERE userID = ?", [userID]);
     if(!voterRow) {
-      cost = 100;
+      cost = 50;
       if(balance >= cost) {
         await sql.run("INSERT INTO bestgirlvoters (userID, nominated, votes, votedFor) VALUES (?, ?, ?, ?)", [userID, 0, 11, ""]);
       } else {
         await sql.run("INSERT INTO bestgirlvoters (userID, nominated, votes, votedFor) VALUES (?, ?, ?, ?)", [userID, 0, 10, ""]);
       }
     } else {
-      cost = (voterRow.votes - 9) * 100;
+      cost = (voterRow.votes - 9) * 50;
       if(voterRow.votes < 10) {
         cost = 0;
       }
@@ -418,7 +418,7 @@ async function buyVote(client, message, command, sql) {
     if(e.message.startsWith("SQLITE_ERROR: no such table:")) {
       console.log("Creating table bestgirlvoters");
       await sql.run("CREATE TABLE IF NOT EXISTS bestgirlvoters (userID TEXT, nominated INTEGER, votes INTEGER, votedFor TEXT)");
-      cost = 100;
+      cost = 50;
       if(balance >= cost) {
         await sql.run("INSERT INTO bestgirlvoters (userID, nominated, votes, votedFor) VALUES (?, ?, ?, ?)", [userID, 0, 11, ""]);
       } else {
