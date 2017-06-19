@@ -447,7 +447,7 @@ async function buyVote(client, message, command, sql) {
         await sql.run("CREATE TABLE IF NOT EXISTS bestgirls (name TEXT, description TEXT, image TEXT, nominator TEXT, votes INTEGER)");
       }
     }
-    return `You now have ${votes + 1} votes. Buying a vote cost \$${cost}.`;
+    return `You now have ${(votes + 1) / 10} votes. Buying a vote cost \$${cost}.`;
   } else {
     return `You cannot afford to buy a vote for \$${cost}.`;
   }
@@ -483,7 +483,7 @@ async function getLeaderboard(client, message, command, sql, config, page) {
     }
     for(let i = start; i < start + 10 && i < girlRows.length; i++) {
       let row = girlRows[i];
-      output += `**#${i+1}: ${row.votes} votes**\n`;
+      output += `**#${i+1}: ${row.votes / 10} votes**\n`;
       output += `${row.name}\n`;
       output += "\n";
     }
@@ -555,7 +555,7 @@ async function getProfileEmbed(client, config, girl) {
     .setDescription(girl.description)
     .setImage(girl.image)
     .addField("Rank:", girl.rank, true)
-    .addField("Votes:", girl.votes, true)
+    .addField("Votes:", girl.votes / 10, true)
     .setFooter(`Nominated by ${user.tag}`)
     ;
 

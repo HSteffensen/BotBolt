@@ -29,7 +29,7 @@ Reset your vote:
 `!bestgirl reset`
 
 Buy more votes:  
-Everyone starts with 10 votes.  
+Everyone starts with 1 vote, and this command will buy 0.1 more vote. It is very expensive.  
 `!bestgirl buyvote`
 
 ## Note on inputs
