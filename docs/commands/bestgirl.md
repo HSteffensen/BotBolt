@@ -1,5 +1,6 @@
 # Bestgirl
 Nominate and vote for girls to decide who is best. Girls have a name, description, and image.  
+See the bottom of the page for nominate and edit examples.  
 
 See the best girl:  
 `!bestgirl`
