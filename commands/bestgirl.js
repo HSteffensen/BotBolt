@@ -486,7 +486,7 @@ async function getLeaderboard(client, message, command, sql, config, page) {
     }
     for(let i = start; i < start + 10 && i < girlRows.length; i++) {
       let row = girlRows[i];
-      output += `**#${i+1}: ${row.votes / 10} votes**\n`;
+      output += `**#${row.rank}: ${row.votes / 10} votes**\n`;
       output += `${row.name}\n`;
       output += "\n";
     }
@@ -592,6 +592,7 @@ function sortGirlRankings(girls) {
     if(girls[i].votes != score) {
       rank = i + 1;
     }
+    score = girls[i].votes;
     girls[i].rank = rank;
   }
 
