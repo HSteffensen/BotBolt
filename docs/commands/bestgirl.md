@@ -17,12 +17,10 @@ Vote for a girl:
 Nominate a girl: see the bottom of the page for more information  
 Nomination costs a lot of money. The Nth nomination costs $N*100.  
 `!bestgirl nominate <name>: <description> <image URL>`  
-`!bestgirl nominate Kanna Kamui: **Don't** lewd the dragon loli. http://pm1.narvii.com/6366/2c35594538206f7f598be792bf203b6b638e9c07_hq.jpg`
 
 Edit a girl you have nominated:  
 Editing costs $10.  
 `!bestgirl edit <field> <name>: <input>` - where `<field>` is either `description` or `image`, and `<input>` is valid for the field.  
-`!bestgirl edit description Kanna Kamui: Seriously, do **NOT** lewd the dragon loli`
 
 Remove a girl you have nominated:  
 `!bestgirl remove <name>`
@@ -43,7 +41,12 @@ Descriptions can be anything. In nomination, the description is everything follo
 
 Newline characters, default emoji, etc. are allowed in descriptions. Regular Discord markdown will work, as will `[embedded links with this format](https://google.com)` [embedded links with this format](https://google.com).
 
-### image
+### Image
 Images must be valid URLs. In nomination, the image **must** be the last word of the input.
 
 It is possible that the URL validation used to check inputs disagrees with what Discord considers a valid URL. I have not run into any problems yet, and it is unlikely that any problems will ever happen, but if it happens just re-upload the image to imgur or something.
+
+### Example
+`!bestgirl nominate Kanna Kamui: **Don't** lewd the dragon loli. http://pm1.narvii.com/6366/2c35594538206f7f598be792bf203b6b638e9c07_hq.jpg`
+
+`!bestgirl edit description Kanna Kamui: Seriously, do **NOT** lewd the dragon loli`
