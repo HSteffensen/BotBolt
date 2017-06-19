@@ -15,12 +15,14 @@ Vote for a girl:
 `!bestgirl vote <name>`
 
 Nominate a girl: see the bottom of the page for more information  
-Nomination costs a lot of money. The Nth nomination costs $N*100.
-`!bestgirl nominate <name>: <description> <image URL>`
+Nomination costs a lot of money. The Nth nomination costs $N*100.  
+`!bestgirl nominate <name>: <description> <image URL>`  
+`!bestgirl nominate Kanna Kamui: **Don't** lewd the dragon loli. http://pm1.narvii.com/6366/2c35594538206f7f598be792bf203b6b638e9c07_hq.jpg`
 
 Edit a girl you have nominated:  
 Editing costs $10.  
-`!bestgirl edit <field> <name>: <input>` - where `<field>` is either `description` or `image`, and `<input>` is valid for the field.
+`!bestgirl edit <field> <name>: <input>` - where `<field>` is either `description` or `image`, and `<input>` is valid for the field.  
+`!bestgirl edit description Kanna Kamui: Seriously, do **NOT** lewd the dragon loli`
 
 Remove a girl you have nominated:  
 `!bestgirl remove <name>`
