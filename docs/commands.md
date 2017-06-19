@@ -12,6 +12,7 @@
 |---
 | Name | Description | Shortcut |
 |:-|:-:|:-|
+| [bestgirl](https://hsteffensen.github.io/BotBolt/commands/bestgirl.html) | Decide who is truly Best Girl | `!best` |
 | [hedgemaze](https://hsteffensen.github.io/BotBolt/commands/hedgemaze.html) | Solve a maze | `!maze` |
 | [skyscraper](https://hsteffensen.github.io/BotBolt/commands/skyscraper.html) | Build the tallest skyscraper | `!sky` |
 | [russianroulette](https://hsteffensen.github.io/BotBolt/commands/russianroulette.html) | Play Russian roulette with your friends | `!ru` |
@@ -25,7 +26,7 @@
 | [cooldown](https://hsteffensen.github.io/BotBolt/commands/cooldown.html) | Check cooldown information | `!cd` |
 | [echo](https://hsteffensen.github.io/BotBolt/commands/echo.html) | Repeat a message | none |
 | [help](https://hsteffensen.github.io/BotBolt/commands/help.html) | Get bot information | `!h` |
-| [ping](https://hsteffensen.github.io/BotBolt/commands/ping.html) | Useless, but not pointless | none |
+| [ping](https://hsteffensen.github.io/BotBolt/commands/ping.html) | Pointless, but not useless | none |
 | [wait](https://hsteffensen.github.io/BotBolt/commands/wait.html) | Wait in command chains | none |
 
 # Bot Owner only
