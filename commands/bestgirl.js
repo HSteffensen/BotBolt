@@ -116,10 +116,6 @@ function checkInputs(name, description, image) {
 }
 
 async function setGirl(sql, userID, name, description, image, type) {
-  name = sanitize(name);
-  description = sanitize(description);
-  image = sanitize(image);
-
   let balance = 0;
   let cost = 10; //default 10 for an edit, will be adjusted for a nominate
   //check if can afford
@@ -221,7 +217,7 @@ async function setGirl(sql, userID, name, description, image, type) {
 async function voteGirl(client, message, command, sql) {
   let args = command.args;
   let userID = message.author.id;
-  let girlName = sanitize(args.splice(1, args.length).join(" "));
+  let girlName = args.splice(1, args.length).join(" ");
   let girlVotes = 0;
 
   //check if girl exists and remember how many votes she already has
@@ -294,7 +290,7 @@ async function voteGirl(client, message, command, sql) {
 async function removeGirl(client, message, command, sql) {
   let args = command.args;
   let userID = message.author.id;
-  let girlName = sanitize(args.splice(1, args.length).join(" "));
+  let girlName = args.splice(1, args.length).join(" ");
 
   //check if girl exists and if user nominated her
   try {
@@ -597,19 +593,4 @@ function sortGirlRankings(girls) {
   }
 
   return girls;
-}
-
-function sanitize(str) {
-  if (typeof str != "string") {
-    return str;
-  }
-
-  var regex = new RegExp(/[\0\x08\x09\x1a\n\r"'\\\%]/g); // eslint-disable-line no-control-regex
-  var escaper = function escaper(char){ // from https://stackoverflow.com/a/31567092
-    var m = ["\\0", "\\x08", "\\x09", "\\x1a", "\\n", "\\r", "'", "\"", "\\", "\\\\", "%"];
-    var r = ["\\\\0", "\\\\b", "\\\\t", "\\\\z", "\\\\n", "\\\\r", "\"\"", "''", "\\\\", "\\\\\\\\", "\\%"];
-    return r[m.indexOf(char)];
-  };
-
-  return str.replace(regex, escaper);
 }
