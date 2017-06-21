@@ -88,7 +88,7 @@ async function runGame(client, message, config, sql, cacheData) {
     resetGame(cacheData);
     return;
   }
-  if(data.bet / (data.players.length - 1) < 1 && data.bet != 0) {
+  if(data.bet != 0 && data.bet / (data.players.length - 1) < 1) {
     message.channel.send("", {embed: {
       color: config.color,
       description: "Russian roulette error: bet too low for this amount of players. Game canceled."
