@@ -28,7 +28,7 @@ exports.run = async (client, message, command, config, sql, shortcut, cacheData)
               tag: message.author.tag,
               bet: amount
             });
-            description = `**${message.author.tag}** has joined Russian roulette.`;
+            description = `**${message.author.tag}** has joined Russian roulette with a bet of \$${amount}.`;
           } else {
             description = "You cannot afford the bet.";
           }
