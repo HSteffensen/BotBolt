@@ -93,7 +93,8 @@ exports.punish = async (client, message, command, config, sql, data) => {
   }
 
   if(commandData.verbosity == 1 || commandData.verbosity == 2) {
-    description = `You are on cooldown for **!${commandName}**.` + description;
+    let dumbass = (Math.random() < 1000) ? ", dumbass" : "";
+    description = `You are on cooldown for **!${commandName}**${dumbass}.` + description;
     try {
       let alertMsg = await message.channel.send("", {embed: {
         color: config.color,
