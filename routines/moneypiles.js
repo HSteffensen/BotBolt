@@ -49,8 +49,11 @@ exports.run = async (client, message, config, sql, data) => {
 
     if(channelData.verbosity == 1) {
       let highDrop = (thirdDrop) ? (Math.random() < 0.5) : true; //50% to not alert a big drop
-      let midDrop = (secondDrop) ? (Math.random() < 0.75) : true; //25% to not alert a big drop
-      if(channelData.pileSize > channelData.secondMin && highDrop && midDrop) { //only alert once larger than a point
+      let midDrop = (secondDrop) ? (Math.random() < 0.75) : true; //25% to not alert a medium drop
+      let tinyLimit = (channelData.firstMax + channelData.firstMin) / 2;
+      let tinyChance = ((dropSize - channelData.firstMin + 1) / (tinyLimit - channelData.firstMin + 1)) * (3 / 4) + 0.25; //min 25% to alert on a tiny drop, up to near 100% for just below median small drop
+      let tinyDrop = (dropSize < tinyLimit) ? (Math.random() < tinyChance) : true; //chance to not alert a drop smaller than the median small drop
+      if(channelData.pileSize > channelData.secondMin && highDrop && midDrop && tinyDrop) { //only alert once larger than a point
         try {
           let alertMsg = await message.channel.send("", {embed: {
             color: config.color,
