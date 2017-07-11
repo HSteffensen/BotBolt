@@ -25,10 +25,14 @@ exports.run = async (client, message, command, config, sql) => {
     }
   } else if(args[0] === "earthquake") {
     let magnitude = parseInt(args[1]);
-    if(!isNaN(magnitude) && magnitude >= 1 && magnitude <= 10) {
+    if(!isNaN(magnitude) && magnitude >= 1 && magnitude <= 50) {
       description = await buyEarthquake(message.author, sql, magnitude, command.verbose);
     } else {
-      description = "Give a magnitude number from 1 to 10: \`!skyscraper earthquake 1\`\nMagnitude 1 costs \$10, and each magnitude higher costs 2x more than the last.";
+      if(magnitude > 50) {
+        description = "Give a magnitude number from 1 to 50: \`!skyscraper earthquake 1\`\nMagnitude 1 costs \$10, and each magnitude higher costs 2x more than the last.";
+      } else  {
+        description = "Give a magnitude number: \`!skyscraper earthquake 1\`\nMagnitude 1 costs \$10, and each magnitude higher costs 2x more than the last.";
+      }
     }
   } else if(args[0] === "sabotage") {
     let target = message.mentions.users.first();
@@ -352,9 +356,16 @@ async function buyStrike(user, sql, target, hours, verbose) {
 
 async function buyEarthquake(user, sql, magnitude, verbose) {
   let userID = user.id;
-  let possibleValues = [[10, 0.99], [20, 0.9801], [40, 0.960596], [80, 0.922745], [160, 0.851458], [320, 0.72498], [640, 0.525596], [1280, 0.276252], [2560, 0.076315], [5120, 0.00582398]];
+  //let possibleValues = [[10, 0.99], [20, 0.9801], [40, 0.960596], [80, 0.922745], [160, 0.851458], [320, 0.72498], [640, 0.525596], [1280, 0.276252], [2560, 0.076315], [5120, 0.00582398]];
+  //let [cost, factor] = possibleValues[magnitude - 1];
   //calculate cost
-  let [cost, factor] = possibleValues[magnitude - 1];
+  let costBase = 1;
+  let factor = 0.99;
+  for(let i = 1; i < magnitude && i < 50; i++) {
+    costBase = costBase * 2;
+    factor = factor * factor;
+  }
+  let cost = costBase * 10;
   let balance = 0;
   //check if can afford
   try {
