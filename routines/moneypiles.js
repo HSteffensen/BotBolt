@@ -202,7 +202,7 @@ async function updateMoneypileSize(sql, data) {
       if(row) {
         await sql.run("UPDATE moneydrop SET pileSize = ? WHERE channelID = ?", [channelData.pileSize, channelData.channelID]);
       } else {
-        console.error("Somehow botbolt/routines/moneypile.js:updateMoneypileSize() tried to update a moneypile in an SQLite row that doesn't exist.");
+        console.error(`Somehow botbolt/routines/moneypiles.js:updateMoneypileSize() tried to update a moneypile in an SQLite row that doesn't exist. channelID: ${channelID}`);
       }
     } catch(e) {
       console.error(e);
